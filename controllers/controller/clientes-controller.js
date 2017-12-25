@@ -71,7 +71,7 @@ function resultadoPrueba(req,res){
                                     malas:0,
                               
                                 },
-                                aprovada:false
+                                aprovada:null
                             };
                             resultados.totalPreguntas=pruebaContestada.preguntas.length;
                             console.log({respuesta:respuestas,preguntas:preguntas,pruebaItem:pruebaItems});
