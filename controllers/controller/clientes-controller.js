@@ -612,10 +612,11 @@ function fechaHoy(){
         let jData;
         let server = ['cl.pool.ntp.org', 'south-america.pool.ntp.org', 'ntp.shoa.cl'];
        
-            ntpClient.getNetworkTime(server[0], 123, (err, data) => {
+            ntpClient.getNetworkTime(server[2], 123, (err, data) => {
                 jData = {
                     fechaHoy: moment(data).format('MM-DD-YYYY'),
-                    horahoy: moment(data).format('HH:mm:ss').split(':')
+                    horahoy: moment(data).format('HH:mm:ss').split(':'),
+                    horahoyses:moment(data).format('HH:mm:ss')
     
                 }
                 resolve(jData);
