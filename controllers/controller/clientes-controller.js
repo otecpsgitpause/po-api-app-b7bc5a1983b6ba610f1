@@ -595,7 +595,7 @@ function dataHoraPMethod(prueba) {
                         hInicio: moment(data).format('HH:mm:ss').split(':'),
                         hFinal: moment(data).seconds(calSP).format('HH:mm:ss').split(':'),
                         hIniciosp:moment(data).format('HH:mm:ss'),
-                        hFinalsp:moment(data).format('HH:mm:ss'),
+                        hFinalsp:moment(data).seconds(calSP).format('HH:mm:ss'),
                         segundosPrueba: calSP
                     }
                     resolve(jData);
