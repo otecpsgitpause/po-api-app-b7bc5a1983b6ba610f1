@@ -165,6 +165,7 @@ function terminarPrueba(req,res){
         let cliente= data.p.prueba.cliente;
         let identificador= data.p.prueba.i;
         let pruebaActiva= data.p.prueba.pruebaActiva;
+        let pruebaCodigo=data.p.pruebaCodigo;
         let preguntas = data.p.preguntas;
 
         console.log({data:data,respuestas:respuestas,cliente:cliente,indentificador:identificador,pruebaActiva:pruebaActiva,preguntas:preguntas});
@@ -172,7 +173,7 @@ function terminarPrueba(req,res){
            
             if(err==null && resCliente!=null){
                let idxCurso= _.findIndex(resCliente.cursosSuscrito,(o)=>{
-                   return o.curso.data.cod_curso==pruebaActiva.prueba.cod_curso;
+                   return o.curso.data.cod_curso==pruebaCodigo.prueba.cod_curso;
                })
 
                if(idxCurso!=-1){
@@ -228,7 +229,7 @@ function terminarPrueba(req,res){
                           
                             }else{
                                 let idxPrueba= _.findIndex(curso.pruebasContestadas,(o)=>{
-                                    return o.prueba.codPrueba==pruebaActiva.prueba.codPrueba;
+                                    return o.prueba.codPrueba==pruebaCodigo.prueba.codPrueba;
                                 })
 
                                 if(idxPrueba==-1){
@@ -282,7 +283,7 @@ function terminarPrueba(req,res){
 
                     curso.esquema.modulos.forEach((modulo,idxM)=>{
                         modulo.pruebas.forEach((pb,idxpb)=>{
-                            if(pb.prueba.codPrueba==pruebaActiva.prueba.codPrueba){
+                            if(pb.prueba.codPrueba==pruebaCodigo.prueba.codPrueba){
                                 obInsert.item=modulo.modulo;
                                 obInsert.prueba=pb.prueba;
                                 obInsert.type='modulo';
@@ -303,7 +304,7 @@ function terminarPrueba(req,res){
                         })
                         modulo.clases.forEach((clase,idxcla)=>{
                             clase.pruebas.forEach((pb,idxpc)=>{
-                                if(pb.prueba.codPrueba==pruebaActiva.prueba.codPrueba){
+                                if(pb.prueba.codPrueba==pruebaCodigo.prueba.codPrueba){
                                     obInsert.item={modulo:modulo.modulo, clase:clase.clase};
                                     obInsert.prueba=pb.prueba;
                                     obInsert.type='clase';
@@ -326,7 +327,7 @@ function terminarPrueba(req,res){
                     })
 
                     curso.esquema.pruebas.forEach((pb,idxpb)=>{
-                        if(pb.prueba.codPrueba==pruebaActiva.prueba.codPrueba){
+                        if(pb.prueba.codPrueba==pruebaCodigo.prueba.codPrueba){
                             obInsert.item=clase.clase;
                             obInsert.prueba=pb.prueba;
                             obInsert.type='curso';
@@ -359,7 +360,7 @@ function terminarPrueba(req,res){
         })
 
 
-        console.log({cliente:cliente,identificador:identificador,pruebaActiva:pruebaActiva});
+
     }catch(e){
         pruebaMethod.respuesta({ curso:null, error:true, mensaje:'Hubo un error al registrar la prueba' });
         
