@@ -90,7 +90,7 @@ function resultadoPrueba(req,res){
                             })
                             resultados.porcentajes.buenas=((resultados.buenas*100)/preguntas.length);
                             resultados.porcentajes.malas=((resultados.malas*100)/preguntas.length);
-                            if(resultados.porcentajes.buenas>= Number.parseInt(pruebaItems.porcentajeAprovacion)){
+                            if(resultados.porcentajes.buenas> Number.parseInt(pruebaItems.porcentajeAprovacion) || resultados.porcentajes.buenas== Number.parseInt(pruebaItems.porcentajeAprovacion)){
                                 resultados.aprovada=true;
                             }else{
                                 resultados.aprovada=false;
