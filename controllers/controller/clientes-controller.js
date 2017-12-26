@@ -75,7 +75,7 @@ function resultadoPrueba(req,res){
                             };
                             resultados.totalPreguntas=pruebaContestada.preguntas.length;
                             console.log({respuesta:respuestas,preguntas:preguntas,pruebaItem:pruebaItems});
-                            if(respuestas!=null){
+                            if(respuestas!=null || respuestas!="" ){
                                     preguntas.forEach((pregunta,idxp)=>{
                                respuestas.forEach((respuesta,idxR)=>{
                                    if(Number.parseInt(pregunta.p.numero)==Number.parseInt(respuesta.p)){
