@@ -340,7 +340,7 @@ function terminarPrueba(req,res){
 
                     curso.esquema.pruebas.forEach((pb,idxpb)=>{
                         if(pb.prueba.codPrueba==pruebaCodigo.prueba.codPrueba){
-                            obInsert.item=clase.clase;
+                            obInsert.item=curso.esquema.curso;
                             obInsert.prueba=pb.prueba;
                             obInsert.type='curso';
                             let idxs={
