@@ -75,7 +75,8 @@ function resultadoPrueba(req,res){
                             };
                             resultados.totalPreguntas=pruebaContestada.preguntas.length;
                             console.log({respuesta:respuestas,preguntas:preguntas,pruebaItem:pruebaItems});
-                            preguntas.forEach((pregunta,idxp)=>{
+                            if(respuestas!=null){
+                                    preguntas.forEach((pregunta,idxp)=>{
                                respuestas.forEach((respuesta,idxR)=>{
                                    if(Number.parseInt(pregunta.p.numero)==Number.parseInt(respuesta.p)){
                                      if(respuesta.c=='true' || respuesta.c==true){
@@ -88,6 +89,14 @@ function resultadoPrueba(req,res){
                                    }
                                })
                             })
+                            
+                            }else{
+                                resultados.buenas=0;
+                                resultados.malas=pruebaContestada.preguntas.length;
+                           
+                            
+                            }
+                    
                             resultados.porcentajes.buenas=((resultados.buenas*100)/preguntas.length);
                             resultados.porcentajes.malas=((resultados.malas*100)/preguntas.length);
                             if(Number.parseInt( resultados.porcentajes.buenas)> Number.parseInt(70) || Number.parseInt( resultados.porcentajes.buenas)== Number.parseInt(70)){
