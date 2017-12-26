@@ -58,8 +58,11 @@ function resultadoPrueba(req,res){
                             method.respuesta({resPrueba:pruebaContestada,error:false,mensaje:null});
                         }else{
                             //hacer calculo
-
-                            let respuestas = pruebaContestada.respuestas;
+                            let respuestas = null;
+                             if(Object.keys(pruebaContestada).indexOf('respuestas')!=-1){
+                             respuestas = pruebaContestada.respuestas;
+                             }
+                            
                             let preguntas = pruebaContestada.preguntas;
                             let pruebaItems= pruebaContestada.prueba;
                             let resultados={
@@ -75,7 +78,7 @@ function resultadoPrueba(req,res){
                             };
                             resultados.totalPreguntas=pruebaContestada.preguntas.length;
                             console.log({respuesta:respuestas,preguntas:preguntas,pruebaItem:pruebaItems});
-                            if(respuestas!=null || respuestas!="" ){
+                            if(respuestas!=null){
                                     preguntas.forEach((pregunta,idxp)=>{
                                respuestas.forEach((respuesta,idxR)=>{
                                    if(Number.parseInt(pregunta.p.numero)==Number.parseInt(respuesta.p)){
