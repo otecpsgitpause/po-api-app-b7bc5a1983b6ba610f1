@@ -28,6 +28,50 @@ var cliente = {
 function resultadoTerminoCurso(req,res){
     try{
         let data = req.body.data;
+        let curso = data.p;
+        let cliente = data.u;
+        let identificador= cliente.i;
+        mgdClientesOtec.findOne("cliente.email":cliente.cliente.email,"identificador.key":identificador},(err,resCliente)=>{
+            if(err==null && resCliente!=null){
+                let idxCurso= _.findIndex(resCliente.cursosSuscrito,(o)=>{
+                    return o.curso.data.cod_curso==curso.cod_curso;
+                });
+                
+              
+                
+                if(idxCurso!=-1){
+                    let curso = resCliente.cursosSuscrito[idxCurso];
+                    if(Object.keys(curso.terminoCurso).indexOf('resultados')!=-1){
+                        //envia los resultados    
+                        
+                    }else{
+                        fechaHoy().then(fecha=>{
+                        //genera los resultados
+                          let resultadoCurso={
+                            fecha:fecha,
+                              resultados:{
+                                   clases:null,
+                                  modulos:null,
+                                  pruebaCurso:null
+                              }
+                          }
+                          
+                          
+                   
+                        })
+                        
+                         }     
+                }else{
+                    method.respuesta({resultadoCurso:null,error:true,mensaje:'No pudimos obtener los resultado'})
+                }
+                
+                
+                
+            }else{
+                method.respuesta({resultadoCurso:null,error:true,mensaje:'No pudimos obtener los resultado'})
+            }
+        })
+        
         console.log({resultadoTerminoCursoData:data});
     }catch(e){
         method.respuesta({resultadoCurso:null,error:true,mensaje:'No pudimos obtener los resultado'})
