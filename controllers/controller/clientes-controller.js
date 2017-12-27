@@ -31,7 +31,7 @@ function resultadoTerminoCurso(req,res){
         let curso = data.p;
         let cliente = data.u;
         let identificador= cliente.i;
-        mgdClientesOtec.findOne("cliente.email":cliente.cliente.email,"identificador.key":identificador},(err,resCliente)=>{
+        mgdClientesOtec.findOne({"cliente.email":cliente.cliente.email,"identificador.key":identificador},(err,resCliente)=>{
             if(err==null && resCliente!=null){
                 let idxCurso= _.findIndex(resCliente.cursosSuscrito,(o)=>{
                     return o.curso.data.cod_curso==curso.cod_curso;
@@ -43,19 +43,114 @@ function resultadoTerminoCurso(req,res){
                     let curso = resCliente.cursosSuscrito[idxCurso];
                     if(Object.keys(curso.terminoCurso).indexOf('resultados')!=-1){
                         //envia los resultados    
-                        
+                        method.respuesta({resultadoCurso:resCliente.cursosSuscrito[idxCurso],error:false,mensaje:null});
                     }else{
                         fechaHoy().then(fecha=>{
                         //genera los resultados
+                            curso.terminoCurso.fecha=fecha;
                           let resultadoCurso={
-                            fecha:fecha,
-                              resultados:{
-                                   clases:null,
-                                  modulos:null,
-                                  pruebaCurso:null
-                              }
+                              resultados:null
                           }
                           
+                          let pruebasContestadas= curso.pruebasContestadas;
+                            let tpCurso=0,tpModulo=0,tpClase=0;
+                            let pAprovacion={
+                                curso:{
+                                  aprovado:false
+                                },
+                                modulo:{
+                                  tAprovada:0,
+                                  tReprovada:0,
+                                  porcentaje:0,
+                                  aprovado:false
+                                }
+                            }
+                            pruebasContestadas.forEach((prueba,idxPrueba)=>{
+                                 let resultado=false;
+                                 if(prueba.temPruebaInit.resultados.aprovada==true ||prueba.temPruebaInit.resultados.aprovada=='true'){
+                                    resultado=true;
+                                 }
+                                if(prueba.item.type=='modulo'){
+                                    tpModulo=tpModulo+1;
+                                     if(resultado==true){
+                                        pAprovacion.modulo.tAprovada=pAprovacion.modulo.tAprovada+1;
+                                     }else{
+                                        pAprovacion.modulo.tReprovada=pAprovacion.modulo.tReprovada+1;
+                                     }
+                                }else if(prueba.item.type=='curso'){
+                                    tpCurso=tpCurso+1;
+                                       if(resultado==true){
+                                        pAprovacion.curso.tAprovada=pAprovacion.curso.tAprovada+1;
+                                     }else{
+                                        pAprovacion.curso.tReprovada=pAprovacion.curso.tReprovada+1;
+                                     }
+                                     
+                                 }
+                                /*
+                                 if(prueba.item.type=='clase'){
+                                     tpClase=tpClase+1;
+                                     if(resultado==true){
+                                        pAprovacion.clase.tAprovada=pAprovacion.clase.tAprovada+1
+                                     }else{
+                                        pAprovacion.clase.tReprovada=pAprovacion.clase.tReprovada+1
+                                     }
+                                 }else if(prueba.item.type=='modulo'){
+                                    tpModulo=tpModulo+1;
+                                     if(resultado==true){
+                                        pAprovacion.modulo.tAprovada=pAprovacion.modulo.tAprovada+1
+                                     }else{
+                                        pAprovacion.modulo.tReprovada=pAprovacion.modulo.tReprovada+1
+                                     }
+                                 }else if(prueba.item.type=='curso'){
+                                    tpCurso=tpCurso+1;
+                                       if(resultado==true){
+                                        pAprovacion.clase.tAprovada=pAprovacion.curso.tAprovada+1
+                                     }else{
+                                        pAprovacion.clase.tReprovada=pAprovacion.curso.tReprovada+1
+                                     }
+                                     
+                                 }*/
+                            })
+                            
+                            let totalPruebaCurso=pAprovacion.curso.tAprovada+pAprovacion.curso.tReprovada;
+                              let totalPruebasModulo=pAprovacion.modulo.tAprovada+pAprovacion.modulo.tReprovada;
+                            pAprovacion.modulo.porcentaje=((pAprovacion.modulo.tAprovada*100)/totalPruebasModulo);
+                          
+                            if(totalPruebaCurso==0){
+                                pAprovacion.modulo.porcentaje=pAprovacion.modulo.porcentaje-40;
+                                  if(pAprovacion.modulo.porcentaje>=70){
+                                        pAprovacion.modulo.aprovado=true
+                                  }else{
+                                        pAprovacion.modulo.aprovado=false
+                                  }
+                            }else{
+                                  if(pAprovacion.modulo.porcentaje>=70){
+                                     pAprovacion.modulo.aprovado=true
+                                  }else{
+                                     pAprovacion.modulo.aprovado=false
+                                  }
+                            }
+                            
+                             pAprovacion.curso.aprovado=pAprovacion.modulo.aprovado;
+                             resultadoCurso.resultados=pAprovacion;
+                             curso.terminoCurso.resultados=resultadoCurso;
+                             resCliente.cursosSuscrito[idxCurso]=curso;
+                             
+                             mgdClientesOtec.update({"cliente.email":cliente.cliente.email,"identificador.key":identificador},{
+                                $set:{
+                                    "cursosSuscrito":resCliente.cursosSuscrito
+                                }
+                             },(err,raw)=>{
+                                if(err==null){
+                                    method.respuesta({resultadoCurso:resCliente.cursosSuscrito[idxCurso],error:false,mensaje:null});
+                                }else{
+                                     method.respuesta({resultadoCurso:null,error:true,mensaje:'No se pudo obtener los resultados, contacte con la otec'})
+                                }
+                             })
+                            
+                            
+                            
+                    
                           
                    
                         })
