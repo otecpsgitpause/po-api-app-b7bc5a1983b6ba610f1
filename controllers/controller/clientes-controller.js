@@ -57,6 +57,7 @@ function resultadoTerminoCurso(req,res){
                             let tpCurso=0,tpModulo=0,tpClase=0;
                             let pAprovacion={
                                 curso:{
+                                  pruebaCursoAprovada:false
                                   aprovado:false
                                 },
                                 modulo:{
@@ -119,6 +120,7 @@ function resultadoTerminoCurso(req,res){
                           
                             if(totalPruebaCurso==0){
                                 if(pAprovacion.modulo.porcentaje>=70){
+                                  pAprovacion.curso.pruebaCursoAprovada=false;
                                   pAprovacion.modulo.porcentaje=pAprovacion.modulo.porcentaje-40;
                                 }
                                 
@@ -128,6 +130,7 @@ function resultadoTerminoCurso(req,res){
                                         pAprovacion.modulo.aprovado=false
                                   }
                             }else{
+                              pAprovacion.curso.pruebaCursoAprovada=true;
                                   if(pAprovacion.modulo.porcentaje>=70){
                                      pAprovacion.modulo.aprovado=true
                                   }else{
