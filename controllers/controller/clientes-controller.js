@@ -41,7 +41,7 @@ function resultadoTerminoCurso(req,res){
                 
                 if(idxCurso!=-1){
                     let curso = resCliente.cursosSuscrito[idxCurso];
-                    if(Object.keys(curso.terminoCurso.resultados!=null){
+                    if(curso.terminoCurso.resultados!=null){
                         //envia los resultados    
                         console.log('enviando los resultados termino curso');
                         method.respuesta({resultadoCurso:resCliente.cursosSuscrito[idxCurso],error:false,mensaje:null});
