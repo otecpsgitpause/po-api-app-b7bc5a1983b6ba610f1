@@ -20,7 +20,9 @@ var app={
             finalPrueba:clientes.finalPrueba,
             reviewPruebaContestada:clientes.reviewPruebaContestada,
             terminarPrueba:clientes.terminarPrueba,
-            resultadoPrueba:clientes.resultadoPrueba
+            resultadoPrueba:clientes.resultadoPrueba,
+            resultadoTerminoCurso:clientes.resultadoTerminoCurso
+            
         },
         complement:{
             hora:hora
