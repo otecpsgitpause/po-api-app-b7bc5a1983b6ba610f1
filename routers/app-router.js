@@ -28,4 +28,6 @@ secureRouter.post('/79vXqTQJb/ynZxlZXZXg7KJSz9Z5u6rxM5NNXML9qVRb',app.cliente.re
 secureRouter.post('/0URyoLnSvLvX3SWDj7MwfSaLj5vjLaJKJrwyXkbePTvf',app.cliente.terminarPrueba);
 //9001b11
 secureRouter.post('/h7iOFiEbRjpxAtnl5TyQ91PgWiYXB9RitmUCKPMlqviz',app.cliente.resultadoPrueba);
+//9001b12
+secureRouter.post('/455DFGDFJkdsjfskDJFKGD8FDKJkjfdgjKDFGJ894DJF',app.cliente.resultadoTerminoCurso);
 module.exports =secureRouter; 
