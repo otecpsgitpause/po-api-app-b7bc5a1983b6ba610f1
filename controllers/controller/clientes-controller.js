@@ -43,11 +43,12 @@ function resultadoTerminoCurso(req,res){
                     let curso = resCliente.cursosSuscrito[idxCurso];
                     if(Object.keys(curso.terminoCurso).indexOf('resultados')!=-1){
                         //envia los resultados    
+                        console.log('enviando los resultados termino curso');
                         method.respuesta({resultadoCurso:resCliente.cursosSuscrito[idxCurso],error:false,mensaje:null});
                     }else{
                         
                         //genera los resultados
-                           
+                            console.log('generando los resultados termino curso');
                           let resultadoCurso={
                               resultados:null
                           }
