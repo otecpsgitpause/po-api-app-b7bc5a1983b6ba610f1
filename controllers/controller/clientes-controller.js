@@ -71,14 +71,14 @@ function resultadoTerminoCurso(req,res){
                                  if(prueba.resultados.aprovada==true ||prueba.resultados.aprovada=='true'){
                                     resultado=true;
                                  }
-                                if(prueba.item.type=='modulo'){
+                                if(prueba.type=='modulo'){
                                     tpModulo=tpModulo+1;
                                      if(resultado==true){
                                         pAprovacion.modulo.tAprovada=pAprovacion.modulo.tAprovada+1;
                                      }else{
                                         pAprovacion.modulo.tReprovada=pAprovacion.modulo.tReprovada+1;
                                      }
-                                }else if(prueba.item.type=='curso'){
+                                }else if(prueba.type=='curso'){
                                     tpCurso=tpCurso+1;
                                        if(resultado==true){
                                         pAprovacion.curso.tAprovada=pAprovacion.curso.tAprovada+1;
