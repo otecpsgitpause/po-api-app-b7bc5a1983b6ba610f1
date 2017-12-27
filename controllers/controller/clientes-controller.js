@@ -118,7 +118,10 @@ function resultadoTerminoCurso(req,res){
                             pAprovacion.modulo.porcentaje=((pAprovacion.modulo.tAprovada*100)/totalPruebasModulo);
                           
                             if(totalPruebaCurso==0){
-                                pAprovacion.modulo.porcentaje=pAprovacion.modulo.porcentaje-40;
+                                if(pAprovacion.modulo.porcentaje>=70){
+                                  pAprovacion.modulo.porcentaje=pAprovacion.modulo.porcentaje-40;
+                                }
+                                
                                   if(pAprovacion.modulo.porcentaje>=70){
                                         pAprovacion.modulo.aprovado=true
                                   }else{
