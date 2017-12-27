@@ -19,10 +19,33 @@ var cliente = {
         finalPrueba: finalPrueba,
         reviewPruebaContestada: reviewPruebaContestada,
         terminarPrueba:terminarPrueba,
-        resultadoPrueba:resultadoPrueba
+        resultadoPrueba:resultadoPrueba,
+        resultadoTerminoCurso:resultadoTerminoCurso
 
     }
 };
+
+function resultadoTerminoCurso(req,res){
+    try{
+        let data = req.body.data;
+        console.log({resultadoTerminoCursoData:data});
+    }catch(e){
+        method.respuesta({resultadoCurso:null,error:true,mensaje:'No pudimos obtener los resultado'})
+    }
+    
+       var method = {
+        respuesta: (item) => {
+            let strgData = JSON.stringify({ data: { resultadoCurso: item.resultadoCurso, error: item.error, mensaje: item.mensaje } });
+            crypto.encode(strgData).then((enc) => {
+                res.json({
+                    d: enc,
+                    success: true
+                })
+            })
+        }
+
+    }
+}
 
 function resultadoPrueba(req,res){
 
