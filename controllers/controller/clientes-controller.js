@@ -45,9 +45,9 @@ function resultadoTerminoCurso(req,res){
                         //envia los resultados    
                         method.respuesta({resultadoCurso:resCliente.cursosSuscrito[idxCurso],error:false,mensaje:null});
                     }else{
-                        fechaHoy().then(fecha=>{
+                        
                         //genera los resultados
-                            curso.terminoCurso.fecha=fecha;
+                           
                           let resultadoCurso={
                               resultados:null
                           }
@@ -135,7 +135,8 @@ function resultadoTerminoCurso(req,res){
                              resultadoCurso.resultados=pAprovacion;
                              curso.terminoCurso.resultados=resultadoCurso;
                              resCliente.cursosSuscrito[idxCurso]=curso;
-                             
+                        fechaHoy().then(fecha=>{
+                              curso.terminoCurso.fecha=fecha;
                              mgdClientesOtec.update({"cliente.email":cliente.cliente.email,"identificador.key":identificador},{
                                 $set:{
                                     "cursosSuscrito":resCliente.cursosSuscrito
@@ -147,13 +148,15 @@ function resultadoTerminoCurso(req,res){
                                      method.respuesta({resultadoCurso:null,error:true,mensaje:'No se pudo obtener los resultados, contacte con la otec'})
                                 }
                              })
+                        
+                        });
+                        
                             
                             
                             
                     
                           
                    
-                        })
                         
                          }     
                 }else{
