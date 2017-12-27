@@ -132,8 +132,7 @@ function resultadoTerminoCurso(req,res){
                             }
                             
                              pAprovacion.curso.aprovado=pAprovacion.modulo.aprovado;
-                             resultadoCurso.resultados=pAprovacion;
-                             curso.terminoCurso.resultados=resultadoCurso;
+                             curso.terminoCurso.resultados=pAprovacion;
                              resCliente.cursosSuscrito[idxCurso]=curso;
                         
                              mgdClientesOtec.update({"cliente.email":cliente.cliente.email,"identificador.key":identificador},{
