@@ -57,7 +57,7 @@ function resultadoTerminoCurso(req,res){
                             let tpCurso=0,tpModulo=0,tpClase=0;
                             let pAprovacion={
                                 curso:{
-                                  pruebaCursoAprovada:false
+                                  pruebaCursoAprovada:false,
                                   aprovado:false
                                 },
                                 modulo:{
