@@ -67,7 +67,7 @@ function resultadoTerminoCurso(req,res){
                             }
                             pruebasContestadas.forEach((prueba,idxPrueba)=>{
                                  let resultado=false;
-                                 if(prueba.temPruebaInit.resultados.aprovada==true ||prueba.temPruebaInit.resultados.aprovada=='true'){
+                                 if(prueba.resultados.aprovada==true ||prueba.resultados.aprovada=='true'){
                                     resultado=true;
                                  }
                                 if(prueba.item.type=='modulo'){
