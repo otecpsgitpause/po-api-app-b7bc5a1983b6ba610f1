@@ -7,7 +7,7 @@ var mgdClientesOtec = require('../../bdmgd/model/clientesOtec');
 var _ = require('lodash');
 var moment = require('moment');
 var ntpClient = require('ntp-client');
-
+  
 
 
 var cliente = {
