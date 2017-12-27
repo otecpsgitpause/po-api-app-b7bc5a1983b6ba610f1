@@ -135,8 +135,7 @@ function resultadoTerminoCurso(req,res){
                              resultadoCurso.resultados=pAprovacion;
                              curso.terminoCurso.resultados=resultadoCurso;
                              resCliente.cursosSuscrito[idxCurso]=curso;
-                        fechaHoy().then(fecha=>{
-                              curso.terminoCurso.fecha=fecha;
+                        
                              mgdClientesOtec.update({"cliente.email":cliente.cliente.email,"identificador.key":identificador},{
                                 $set:{
                                     "cursosSuscrito":resCliente.cursosSuscrito
@@ -149,7 +148,7 @@ function resultadoTerminoCurso(req,res){
                                 }
                              })
                         
-                        });
+                       
                         
                             
                             
