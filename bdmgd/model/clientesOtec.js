@@ -19,7 +19,7 @@ var clientesOtec = Schema({
         fechaInscripcion: Object,
         terminoCurso:{
             fecha:"",
-            resultados:null
+            resultados:""
         }
 
     }],
