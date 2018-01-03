@@ -50,12 +50,12 @@ function resultadoTerminoCurso(req,res){
                         
      
                         //calcular las pruebas
-                        method.calculandoPruebas({curso:coursea.cod_curso,email:cliente.cliente.email,identificador:identificador}).then(()=>{
+                       // method.calculandoPruebas({curso:coursea.cod_curso,email:cliente.cliente.email,identificador:identificador}).then(()=>{
                         //ot
                         //genera los resultados
 
 
-                        setTimeout(()=>{
+                       // setTimeout(()=>{
 
                      
 
@@ -170,11 +170,11 @@ function resultadoTerminoCurso(req,res){
                       
 
 
-                        },10000)
+                       // },10000)
 
 
 
-                        })
+                        //})
 
 
 
