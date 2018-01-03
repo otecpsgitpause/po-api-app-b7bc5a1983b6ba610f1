@@ -37,6 +37,7 @@ function resultadoTerminoCurso(req,res){
                     return o.curso.data.cod_curso==curso.cod_curso;
                 });
                 
+                let coursea= curso;
               
                 
                 if(idxCurso!=-1){
@@ -49,7 +50,7 @@ function resultadoTerminoCurso(req,res){
                         
      
                         //calcular las pruebas
-                        method.calculandoPruebas({curso:curso.cod_curso,email:cliente.cliente.email,identificador:identificador}).then(()=>{
+                        method.calculandoPruebas({curso:coursea.cod_curso,email:cliente.cliente.email,identificador:identificador}).then(()=>{
                         //ot
                         //genera los resultados
                         console.log('generando los resultados termino curso');
