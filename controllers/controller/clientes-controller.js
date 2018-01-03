@@ -47,10 +47,10 @@ function resultadoTerminoCurso(req,res){
                         method.respuesta({resultadoCurso:resCliente.cursosSuscrito[idxCurso],error:false,mensaje:null});
                     }else{
                         
-
+     
                         //calcular las pruebas
                         method.calculandoPruebas({curso:curso.cod_curso,email:cliente.cliente.email,identificador:identificador}).then(()=>{
-                        
+                        //ot
                         //genera los resultados
                         console.log('generando los resultados termino curso');
                         let resultadoCurso={
@@ -199,6 +199,7 @@ function resultadoTerminoCurso(req,res){
         },
         calculandoPruebas:(item)=>{
             return new Promise((resolve,reject)=>{
+                console.log('calculando las pruebas ohhhh yeaaa!!!');
                 mgdClientesOtec.findOne({"cliente.email":item.email,"identificador.key":item.identificador},(err,resCliente)=>{
                     if(err==null && resCliente!=null){
 
