@@ -53,6 +53,12 @@ function resultadoTerminoCurso(req,res){
                         method.calculandoPruebas({curso:coursea.cod_curso,email:cliente.cliente.email,identificador:identificador}).then(()=>{
                         //ot
                         //genera los resultados
+
+
+                        setTimeout(()=>{
+
+                     
+
                         console.log('generando los resultados termino curso');
                         let resultadoCurso={
                             resultados:null
@@ -158,8 +164,20 @@ function resultadoTerminoCurso(req,res){
                                    method.respuesta({resultadoCurso:null,error:true,mensaje:'No se pudo obtener los resultados, contacte con la otec'})
                               }
                            })
+
+
+
                       
+
+
+                        },10000)
+
+
+
                         })
+
+
+
 
 
                        
@@ -282,15 +300,17 @@ function resultadoTerminoCurso(req,res){
 
 
                                     let totales= (cursoItem.pruebasContestadas.length-1);
-                                    if(totales==idxPC){
-                                        resolve(true);
-                                    }
+                               
+                                      
+                                 
  
                                      
                                 }
                             
                                
                             })
+
+                            resolve(true);
                         }
 
 
