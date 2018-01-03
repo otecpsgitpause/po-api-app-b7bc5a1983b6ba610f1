@@ -200,6 +200,7 @@ function resultadoTerminoCurso(req,res){
         calculandoPruebas:(item)=>{
             return new Promise((resolve,reject)=>{
                 console.log('calculando las pruebas ohhhh yeaaa!!!');
+                console.log({calculandoPruebasItem:item});
                 mgdClientesOtec.findOne({"cliente.email":item.email,"identificador.key":item.identificador},(err,resCliente)=>{
                     if(err==null && resCliente!=null){
 
