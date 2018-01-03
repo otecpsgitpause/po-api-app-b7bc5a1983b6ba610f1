@@ -207,6 +207,7 @@ function resultadoTerminoCurso(req,res){
                         let idxCurso = _.findIndex(resCliente.cursosSuscrito,(o)=>{
                             return o.curso.data.cod_curso==item.curso;
                         })
+                        console.log({idxCursoMantecol:idxCurso});
                         let cursoItem = resCliente.cursosSuscrito[idxCurso];
         
                         if(cursoItem.pruebasContestadas.length>0){
