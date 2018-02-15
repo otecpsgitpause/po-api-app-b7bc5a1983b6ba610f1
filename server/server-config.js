@@ -1,3 +1,4 @@
+const sts = require('strict-transport-security');
 var express = require('express');
 var bodyParser = require('body-parser');
 var morgan = require('morgan');
@@ -6,6 +7,7 @@ var methodOverride = require('method-override');
 var jwt = require('jsonwebtoken'); //no use
 var ip = require('ip');
 var app = express();
+const globalSTS = sts.getSTS({'max-age':{'days': 365}});
 var secureRoutes = express.Router();
 var cluster = require('cluster');
 var numCPUs= require('os').cpus().length;
@@ -17,6 +19,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.json({ type: 'application/vnd.api+json' }));
 app.use(methodOverride());
 app.use(cors());
+app.use(globalSTS);
 
 
  
