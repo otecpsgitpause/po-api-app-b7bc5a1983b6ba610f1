@@ -19,7 +19,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.json({ type: 'application/vnd.api+json' }));
 app.use(methodOverride());
 app.use(cors());
-app.use(globalSTS);
+//app.use(globalSTS);
 
 
  
