@@ -850,7 +850,7 @@ function informartiempo(req, res) {
 
             })
 
-            if(esquema.pruebas.length==0 && modulosComplete.indexOf(false)==-1){
+            if(esquema.esquema.pruebas.length==0 && modulosComplete.indexOf(false)==-1){
                 esquema.esquema.completado=true;
             }
             esquema.terminoCurso.fecha= fechaHoyNoPromise();
