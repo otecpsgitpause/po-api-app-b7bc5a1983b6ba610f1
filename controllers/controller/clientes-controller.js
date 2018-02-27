@@ -483,7 +483,7 @@ function terminarPrueba(req,res){
         console.log({data:data,respuestas:respuestas,cliente:cliente,indentificador:identificador,pruebaActiva:pruebaActiva,preguntas:preguntas});
         mgdClientesOtec.findOne({"cliente.email":cliente.email,"identificador.key":identificador},(err,resCliente)=>{
            
-            if(err==null && resCliente!=null){
+            if(resCliente!=null){
                let idxCurso= _.findIndex(resCliente.cursosSuscrito,(o)=>{
                    return o.curso.data.cod_curso==pruebaCodigo.prueba.cod_curso;
                })
@@ -777,10 +777,11 @@ function informartiempo(req, res) {
                 let idxCurso = _.findIndex(cursosSuscritos, (o) => {
                     return o.curso.data.cod_curso == curso
                 })
-                if (idxCurso != -1) {
+                if (idxCurso > -1) {
                     let cursoUpdate = resEstudiante.cursosSuscrito[idxCurso];
                     cursoUpdate.esquema.modulos[cnt.im].clases[cnt.ic].clase.horasClaseSegundos = time;
-                    resEstudiante.cursosSuscrito[idxCurso] = cursoUpdate;
+                    resEstudiante.cursosSuscrito[idxCurso]=method.____updateEsquema(cursoUpdate);
+                     
                     mgdClientesOtec.update({ "cliente.rut": user.cliente.rut, "identificador.key": identificador }, {
                         $set: {
                             "cursosSuscrito": resEstudiante.cursosSuscrito
@@ -820,6 +821,43 @@ function informartiempo(req, res) {
                     success: true
                 })
             })
+        },
+        ____updateEsquema:(curso)=>{
+            /**
+             * Verifica si existen pruebas que no se han rendido en el curso, modulos y clases, si no hay
+             * actualiza el esquema
+             */
+            let esquema=curso;
+            let modulosComplete= new Array();
+            esquema.esquema.modulos.forEach((modulo, idxModulo)=>{
+                let clasesComplete=new Array();
+                modulo.clases.forEach((clase,idxClase)=>{
+                    if(clase.clase.horasclaseSegundos==0 || clase.clase.horasclaseSegundos == "0"){
+                        if(clase.pruebas.length==0){
+                            esquema.esquema.modulos[idxModulo].clases[idxClase].completado=true;
+
+                        }
+                    }
+                    clasesComplete.push(esquema.esquema.modulos[idxModulo].clases[idxClase].completado);                    
+                })
+
+
+                if(esquema.esquema.modulos[idxModulo].pruebas.length==0 && clasesComplete.indexOf(false)==-1){
+                    esquema.esquema.modulos[idxModulo].completado==true;
+                }
+
+                modulosComplete.push(esquema.esquema.modulos[idxModulo].completado);
+
+            })
+
+            if(esquema.pruebas.length==0 && modulosComplete.indexOf(false)==-1){
+                esquema.esquema.completado=true;
+            }
+            esquema.terminoCurso.fecha= fechaHoyNoPromise();
+
+            return esquema;
+
+
         }
 
     }
@@ -938,6 +976,21 @@ function fechaHoy(){
     })
 
 
+}
+
+function fechaHoyNoPromise(){
+    let jData;
+        let server = ['cl.pool.ntp.org', 'south-america.pool.ntp.org', 'ntp.shoa.cl'];
+        ntpClient.getNetworkTime(server[2], 123, (err, data) => {
+            jData = {
+                fechaHoy: moment(data).format('MM-DD-YYYY'),
+                horahoy: moment(data).format('HH:mm:ss').split(':'),
+                horahoyses:moment(data).format('HH:mm:ss')
+
+            }
+        })
+
+        return jData;
 }
 
 
