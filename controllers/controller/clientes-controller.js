@@ -1004,12 +1004,18 @@ function getPruebaTest(req, res) {
         let cliente = data.u.cliente;
         console.log({ cliente: cliente });
         mgdClientesOtec.findOne({ "cliente.email": cliente.email, "identificador.key": identificador }, (err, resCliente) => {
-            if (err == null && resCliente != null) {
-                mgdCursos.findOne({ "curso.cod_curso": prueba.cod_curso }, (err, resCurso) => {
+            if (resCliente != null) {
+                let cod_curso = prueba.cod_curso;
+                let idxCurso = _.findIndex(resCliente.cursosSuscrito,(o)=>{
+                    return o.esquema.curso.cod_curso==cod_curso;
+                })
+
+                if(idxCurso>-1){
+                    let resCurso= resCliente.cursosSuscrito[idxCurso].esquema;
                     fechaHoy().then((fechaHoyItem)=>{
-                        if (err == null && resCurso != null) {
+                     
                             resCurso.modulos.forEach((m, idxm) => {
-                                m.pruebasModulo.forEach((pm, pmidx) => {
+                                m.pruebas.forEach((pm, pmidx) => {
                                     if (pm.prueba.codPrueba == prueba.codPrueba) {
                                         if (resCliente.temPruebaInit == null) {
                                         
@@ -1021,7 +1027,7 @@ function getPruebaTest(req, res) {
                                     }
                                 })
                                 m.clases.forEach((cla, idxCla) => {
-                                    cla.pruebasClase.forEach((pcla, pIdxCla) => {
+                                    cla.pruebas.forEach((pcla, pIdxCla) => {
                                         if (pcla.prueba.codPrueba == prueba.codPrueba) {
                                             if (resCliente.temPruebaInit == null) {
                                                 method.setPruebaActivate({ email: cliente.email, identificador: identificador, prueba: { prueba: pcla, idx: { idxp: pIdxCla, idxClase: idxCla, idxModulo: idxm }, type: 'clase',fecha:fechaHoyItem } });
@@ -1033,7 +1039,7 @@ function getPruebaTest(req, res) {
                                     })
                                 })
                             })
-                            resCurso.pruebasCurso.forEach((pcur, idxpcur) => {
+                            resCurso.pruebas.forEach((pcur, idxpcur) => {
                                 if (pcur.prueba.codPrueba == prueba.codPrueba) {
                                     if (resCliente.temPruebaInit == null) {
                                         method.setPruebaActivate({ email: cliente.email, identificador: identificador, prueba: { prueba: pcur, idx: { idxp: idxpcur }, type: 'curso',fecha:fechaHoyItem } });
@@ -1043,17 +1049,17 @@ function getPruebaTest(req, res) {
     
                                 }
                             })
-                        } else {
-                            method.respuesta({ prueba: null, error: true, mensaje: null,temPruebaInit:null });
-                        }
+                      
     
                     }).catch(()=>{
                         method.respuesta({ prueba: null, error: true, mensaje: null,temPruebaInit:null });
                     })
-                    
-        
+                }else{
+                    //enviar respuesta curso no encontrado
+                    method.respuesta({ prueba: null, error: true, mensaje: null,temPruebaInit:null });
+                }
 
-                })
+             
             } else {
                 method.respuesta({ prueba: null, error: true, mensaje: null,temPruebaInit:null });
             }
@@ -1098,273 +1104,10 @@ function getPruebaTest(req, res) {
            
             })
 
-            /*
-            mgdClientesOtec.update({"cliente.email":item.email,"identificador.key":item.identificador},{
-                $set:{
-                    "temPruebaInit":null
-                }
-            },(err,raw)=>{
-
-            })*/
+         
         }
 
     }
-
-    /*
-        try {
-            let data = req.body.data.p;
-            let curso = data.c;
-            let prueba = data.p.p;
-            let im = data.p.im;
-            let ic = data.p.ic;
-            let identificador = req.body.ident;
-            let type = req.body.data.p.p.type;
-            let cliente = req.body.data.u.cliente;
-            console.log({ dataConMuchoMoco: cliente });
-            console.log({ pruebaReview: prueba });
-            console.log({ dataCursoReview: curso });
-            console.log({ tipoPrueba: type });
-    
-    
-            mgdClientesOtec.find({ "cliente.rut": cliente.rut }, (err, resDataClient) => {
-                if (err == null && resDataClient.length) {
-                    let idxCurso = _.findIndex(resDataClient[0].cursosSuscrito, (o) => {
-                        return o.curso.data.cod_curso == curso;
-                    })
-    
-                    let cursoFinds = resDataClient[0].cursosSuscrito[idxCurso];
-                    let idxPrueba = 0;
-                    if (cursoFinds.pruebasContestadas.length > 0) {
-                        if (type == 'curso') {
-                            idxPrueba = _.findIndex(cursoFinds.pruebasContestadas, (o) => {
-                                return o.prueba.codPrueba == prueba;
-                            });
-                            console.log({ getPruebaTestTypePrueba: type });
-                        }
-                        else if (type == 'modulo') {
-                            idxPrueba = _.findIndex(cursoFinds.pruebasContestadas, (o) => {
-                                return o.prueba.codPrueba == prueba;
-                            });
-                        } else if (type == 'clase') {
-                            idxPrueba = _.findIndex(cursoFinds.pruebasContestadas, (o) => {
-                                return o.prueba.prueba.codPrueba == prueba;
-                            });
-                        }
-    
-    
-                        if (idxPrueba == -1) {
-                            console.log('ENVIANDO PRUEBA PORFAVOR');
-                            sendPrueba.envioPrueba();
-                        } else {
-                            let strgData = JSON.stringify({ data: { prueba: null, p: false, m: "prueba ya respondida", temPrueba: null } });
-                            crypto.encode(strgData).then((enc) => {
-                                res.json({
-                                    d: enc,
-                                    success: true,
-                                    pet: true
-                                })
-                            })
-                        }
-    
-                    } else {
-                        sendPrueba.envioPrueba();
-                    }
-    
-    
-                }
-            })
-    
-            let sendPrueba = {
-                envioPrueba: () => {
-                    mgdCursos.find({ "curso.cod_curso": curso, "identificador.key": identificador }, (err, resCurso) => {
-    
-                        var findPruebas = {
-                            curso: () => {
-                                let indexPrueba = _.findIndex(resCurso[0].pruebasCurso, (o) => {
-                                    return o.prueba.codPrueba == prueba;
-                                })
-                                let pruebaItem = resCurso[0].pruebasCurso[indexPrueba];
-                                mgdClientesOtec.find({ "cliente.rut": cliente.rut }, (errCliente, resCliente) => {
-                                    console.log({ respuestaDeResCliente: resCliente, errResCliente: errCliente });
-                                    if (errCliente == null && resCliente.length > 0) {
-                                        let indexObject = Object.keys(resCliente[0]._doc).indexOf('temPruebaInit');
-                                        console.log({ objetosDeResCliente: Object.keys(resCliente[0]) });
-                                        if (indexObject != -1) {
-                                            if (resCliente[0].temPruebaInit != null) {
-                                                let strgData = JSON.stringify({ data: { prueba: pruebaItem, p: true, m: null, temPrueba: resCliente[0].temPruebaInit, horas: resCliente[0].temPruebaInit, hInitp: null } });
-                                                crypto.encode(strgData).then((enc) => {
-                                                    res.json({
-                                                        d: enc,
-                                                        success: true,
-                                                        pet: true
-                                                    })
-                                                })
-                                            } else {
-                                                dataHoraPMethod(pruebaItem).then((h) => {
-                                                    let strgData = JSON.stringify({ data: { prueba: pruebaItem, p: true, m: null, temPrueba: resCliente[0].temPruebaInit, horas: null, hInitp: h } });
-                                                    crypto.encode(strgData).then((enc) => {
-                                                        res.json({
-                                                            d: enc,
-                                                            success: true,
-                                                            pet: true
-                                                        })
-                                                    })
-                                                })
-    
-                                            }
-                                            console.log({ resClienteMasMoco: resCliente[0] });
-    
-                                        } else {
-                                            console.log({ resClienteMasMoco: resCliente[0] });
-                                            let strgData = JSON.stringify({ data: { prueba: pruebaItem, p: true, m: null, temPrueba: null } });
-                                            crypto.encode(strgData).then((enc) => {
-                                                res.json({
-                                                    d: enc,
-                                                    success: true,
-                                                    pet: true
-                                                })
-                                            })
-                                        }
-                                    }
-                                })
-                            },
-                            modulo: () => {
-                                let indexPrueba = _.findIndex(resCurso[0].modulos[Number.parseInt(im)].pruebasModulo, (o) => {
-                                    return o.prueba.codPrueba == prueba;
-                                })
-                                let pruebaItem = resCurso[0].modulos[Number.parseInt(im)].pruebasModulo[indexPrueba];
-    
-    
-                                mgdClientesOtec.find({ "cliente.rut": cliente.rut }, (errCliente, resCliente) => {
-                                    console.log({ respuestaDeResCliente: resCliente, errResCliente: errCliente });
-                                    if (errCliente == null && resCliente.length > 0) {
-                                        let indexObject = Object.keys(resCliente[0]._doc).indexOf('temPruebaInit');
-                                        console.log({ objetosDeResCliente: Object.keys(resCliente[0]) });
-                                        if (indexObject != -1) {
-                                            if (resCliente[0].temPruebaInit != null) {
-                                                let strgData = JSON.stringify({ data: { prueba: pruebaItem, p: true, m: null, temPrueba: resCliente[0].temPruebaInit, horas: resCliente[0].temPruebaInit, hInitp: null } });
-                                                crypto.encode(strgData).then((enc) => {
-                                                    res.json({
-                                                        d: enc,
-                                                        success: true,
-                                                        pet: true
-                                                    })
-                                                })
-                                            } else {
-                                                dataHoraPMethod(pruebaItem).then((h) => {
-                                                    let strgData = JSON.stringify({ data: { prueba: pruebaItem, p: true, m: null, temPrueba: resCliente[0].temPruebaInit, horas: null, hInitp: h } });
-                                                    crypto.encode(strgData).then((enc) => {
-                                                        res.json({
-                                                            d: enc,
-                                                            success: true,
-                                                            pet: true
-                                                        })
-                                                    })
-                                                })
-    
-                                            }
-                                            console.log({ resClienteMasMoco: resCliente[0] });
-    
-                                        } else {
-                                            console.log({ resClienteMasMoco: resCliente[0] });
-                                            let strgData = JSON.stringify({ data: { prueba: pruebaItem, p: true, m: null, temPrueba: null } });
-                                            crypto.encode(strgData).then((enc) => {
-                                                res.json({
-                                                    d: enc,
-                                                    success: true,
-                                                    pet: true
-                                                })
-                                            })
-                                        }
-                                    }
-                                })
-    
-                            },
-                            clase: () => {
-                                console.log({ codPrueba: prueba, arrayPruebasClase: resCurso[0].modulos[Number.parseInt(im)].clases[Number.parseInt(ic)].pruebasClase });
-                                let indexPrueba = _.findIndex(resCurso[0].modulos[Number.parseInt(im)].clases[Number.parseInt(ic)].pruebasClase, (o) => {
-                                    return o.prueba.codPrueba == prueba;
-                                })
-                                console.log({ indexObtenido: indexPrueba });
-                                let pruebaItem = resCurso[0].modulos[Number.parseInt(im)].clases[Number.parseInt(ic)].pruebasClase[indexPrueba];
-    
-    
-                                mgdClientesOtec.find({ "cliente.rut": cliente.rut }, (errCliente, resCliente) => {
-                                    console.log({ respuestaDeResCliente: resCliente, errResCliente: errCliente });
-                                    if (errCliente == null && resCliente.length > 0) {
-                                        let indexObject = Object.keys(resCliente[0]._doc).indexOf('temPruebaInit');
-                                        console.log({ objetosDeResCliente: Object.keys(resCliente[0]) });
-                                        if (indexObject != -1) {
-                                            if (resCliente[0].temPruebaInit != null) {
-                                                let strgData = JSON.stringify({ data: { prueba: pruebaItem, p: true, m: null, temPrueba: resCliente[0].temPruebaInit, horas: resCliente[0].temPruebaInit, hInitp: null } });
-                                                crypto.encode(strgData).then((enc) => {
-                                                    res.json({
-                                                        d: enc,
-                                                        success: true,
-                                                        pet: true
-                                                    })
-                                                })
-                                            } else {
-                                                dataHoraPMethod(pruebaItem).then((h) => {
-                                                    let strgData = JSON.stringify({ data: { prueba: pruebaItem, p: true, m: null, temPrueba: resCliente[0].temPruebaInit, horas: null, hInitp: h } });
-                                                    crypto.encode(strgData).then((enc) => {
-                                                        res.json({
-                                                            d: enc,
-                                                            success: true,
-                                                            pet: true
-                                                        })
-                                                    })
-                                                })
-    
-                                            }
-                                            console.log({ resClienteMasMoco: resCliente[0] });
-    
-                                        } else {
-                                            console.log({ resClienteMasMoco: resCliente[0] });
-                                            let strgData = JSON.stringify({ data: { prueba: pruebaItem, p: true, m: null, temPrueba: null } });
-                                            crypto.encode(strgData).then((enc) => {
-                                                res.json({
-                                                    d: enc,
-                                                    success: true,
-                                                    pet: true
-                                                })
-                                            })
-                                        }
-                                    }
-                                })
-                            }
-    
-                        }
-    
-                        if (type == 'curso') {
-                            findPruebas.curso();
-    
-                        } else if (type == 'modulo') {
-                            findPruebas.modulo();
-    
-                        } else if (type == 'clase') {
-    
-                            findPruebas.clase();
-    
-                        }
-    
-    
-                    })
-                }
-            }
-    
-            console.log({ dataItemgetPruebatest: req.body.data.p.p })
-        } catch (e) {
-            let strgData = JSON.stringify({ data: { prueba: null, p: false, m: "No se pudo cargar la prueba", temPrueba: null } });
-            crypto.encode(strgData).then((enc) => {
-                res.json({
-                    d: enc,
-                    success: true,
-                    pet: true
-                })
-            })
-        }
-    */
 
 }
 
