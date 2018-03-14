@@ -7,7 +7,7 @@ var mgdClientesOtec = require('../../bdmgd/model/clientesOtec');
 var _ = require('lodash');
 var moment = require('moment');
 var ntpClient = require('ntp-client');
-  
+
 
 
 var cliente = {
@@ -18,167 +18,222 @@ var cliente = {
         informarInicioPrueba: informarInicioPrueba,
         finalPrueba: finalPrueba,
         reviewPruebaContestada: reviewPruebaContestada,
-        terminarPrueba:terminarPrueba,
-        resultadoPrueba:resultadoPrueba,
-        resultadoTerminoCurso:resultadoTerminoCurso,
-        updateEsquema:updateEsquema
+        terminarPrueba: terminarPrueba,
+        resultadoPrueba: resultadoPrueba,
+        resultadoTerminoCurso: resultadoTerminoCurso,
+        updateEsquema: updateEsquema
     }
 };
 
-function updateEsquema(req,res){
+function updateEsquema(req, res) {
     let data = req.body.data;
     let curso = data.p.curso;
     let cliente = data.u.cliente;
     let identificador = data.u.i;
-    console.log({updateEsquema:{data:data,curso:curso,cliente:cliente,identificador:identificador}});
+    console.log({ updateEsquema: { data: data, curso: curso, cliente: cliente, identificador: identificador } });
+    let opcionesTerminoCurso=['Aprovar prueba termino curso','Visualización módulos','Aprovar pruebas módulo',
+        'Aprovar pruebas curso + módulos','Aprovar pruebas clases','Aprovar pruebas curso + módulos + clases'
+    ]
+    mgdClientesOtec.findOne({ "cliente.correoPago": cliente.correoPago }, (err, resCliente) => {
+        if (resCliente != null) {
+            let idxCurso = _.findIndex(resCliente.cursosSuscrito, (o) => {
+                return o.curso.data.cod_curso == curso.cod_curso;
+            });
+
+            if (idxCurso > -1) {
+
+                let cursoSelected = resCliente.cursosSuscrito[idxCurso];
+
+                let TerminoCurso= curso.opcionTerminoCurso.name;
+
+                if(TerminoCurso=='Aprovar prueba termino curso'){
+                    terminosCurso.APTC(cursoSelected);
+                }else if(TerminoCurso=='Visualizacion módulos'){
+                    terminosCurso.VM(cursoSelected);
+                }
+
+
+            } else {
+                method.respuesta({ curso: null });
+            }
+        } else {
+            method.respuesta({ curso: null });
+        }
+    })
+
+
+    var terminosCurso={
+        APTC:(curso)=>{
+
+        },
+        VM:(curso)=>{
+            console.log({VM:{cursoSelected:curso}});
+        }
+    }
+
+
+    var method = {
+        respuesta: (item) => {
+            let strgData = JSON.stringify({ data: { curso: item.curso } });
+            crypto.encode(strgData).then((enc) => {
+                res.json({
+                    d: enc,
+                    success: true
+                })
+            })
+        }
+    }
+
+
+
 }
 
-function resultadoTerminoCurso(req,res){
-    try{
+function resultadoTerminoCurso(req, res) {
+    try {
         let data = req.body.data;
         let curso = data.p;
         let cliente = data.u;
-        let identificador= cliente.i;
-        mgdClientesOtec.findOne({"cliente.email":cliente.cliente.email,"identificador.key":identificador},(err,resCliente)=>{
-            if(err==null && resCliente!=null){
-                let idxCurso= _.findIndex(resCliente.cursosSuscrito,(o)=>{
-                    return o.curso.data.cod_curso==curso.cod_curso;
+        let identificador = cliente.i;
+        mgdClientesOtec.findOne({ "cliente.email": cliente.cliente.email, "identificador.key": identificador }, (err, resCliente) => {
+            if (err == null && resCliente != null) {
+                let idxCurso = _.findIndex(resCliente.cursosSuscrito, (o) => {
+                    return o.curso.data.cod_curso == curso.cod_curso;
                 });
-                
-                let coursea= curso;
-              
-                
-                if(idxCurso!=-1){
+
+                let coursea = curso;
+
+
+                if (idxCurso != -1) {
                     let curso = resCliente.cursosSuscrito[idxCurso];
-                    if(curso.terminoCurso.resultados!=null){
+                    if (curso.terminoCurso.resultados != null) {
                         //envia los resultados    
                         console.log('enviando los resultados termino curso');
-                        method.respuesta({resultadoCurso:resCliente.cursosSuscrito[idxCurso],error:false,mensaje:null});
-                    }else{
-                        
-     
+                        method.respuesta({ resultadoCurso: resCliente.cursosSuscrito[idxCurso], error: false, mensaje: null });
+                    } else {
+
+
                         //calcular las pruebas
-                       // method.calculandoPruebas({curso:coursea.cod_curso,email:cliente.cliente.email,identificador:identificador}).then(()=>{
+                        // method.calculandoPruebas({curso:coursea.cod_curso,email:cliente.cliente.email,identificador:identificador}).then(()=>{
                         //ot
                         //genera los resultados
 
 
-                       // setTimeout(()=>{
+                        // setTimeout(()=>{
 
-                     
+
 
                         console.log('generando los resultados termino curso');
-                        let resultadoCurso={
-                            resultados:null
+                        let resultadoCurso = {
+                            resultados: null
                         }
-                        
-                        let pruebasContestadas= curso.pruebasContestadas;
-                          let tpCurso=0,tpModulo=0,tpClase=0;
-                          let pAprovacion={
-                              curso:{
-                                pruebaCursoAprovada:false,
-                                aprovado:false
-                              },
-                              modulo:{
-                                tAprovada:0,
-                                tReprovada:0,
-                                porcentaje:0,
-                                aprovado:false
-                              }
-                          }
-                          pruebasContestadas.forEach((prueba,idxPrueba)=>{
-                               let resultado=false;
-                               if(prueba.resultados.aprovada==true ||prueba.resultados.aprovada=='true'){
-                                  resultado=true;
-                               }
-                              if(prueba.type=='modulo'){
-                                  tpModulo=tpModulo+1;
-                                   if(resultado==true){
-                                      pAprovacion.modulo.tAprovada=pAprovacion.modulo.tAprovada+1;
-                                   }else{
-                                      pAprovacion.modulo.tReprovada=pAprovacion.modulo.tReprovada+1;
-                                   }
-                              }else if(prueba.type=='curso'){
-                                  tpCurso=tpCurso+1;
-                                     if(resultado==true){
-                                      pAprovacion.curso.tAprovada=pAprovacion.curso.tAprovada+1;
-                                   }else{
-                                      pAprovacion.curso.tReprovada=pAprovacion.curso.tReprovada+1;
-                                   }
-                                   
-                               }
-                              /*
-                               if(prueba.item.type=='clase'){
-                                   tpClase=tpClase+1;
-                                   if(resultado==true){
-                                      pAprovacion.clase.tAprovada=pAprovacion.clase.tAprovada+1
-                                   }else{
-                                      pAprovacion.clase.tReprovada=pAprovacion.clase.tReprovada+1
-                                   }
-                               }else if(prueba.item.type=='modulo'){
-                                  tpModulo=tpModulo+1;
-                                   if(resultado==true){
-                                      pAprovacion.modulo.tAprovada=pAprovacion.modulo.tAprovada+1
-                                   }else{
-                                      pAprovacion.modulo.tReprovada=pAprovacion.modulo.tReprovada+1
-                                   }
-                               }else if(prueba.item.type=='curso'){
-                                  tpCurso=tpCurso+1;
-                                     if(resultado==true){
-                                      pAprovacion.clase.tAprovada=pAprovacion.curso.tAprovada+1
-                                   }else{
-                                      pAprovacion.clase.tReprovada=pAprovacion.curso.tReprovada+1
-                                   }
-                                   
-                               }*/
-                          })
-                          
-                          let totalPruebaCurso=pAprovacion.curso.tAprovada+pAprovacion.curso.tReprovada;
-                            let totalPruebasModulo=pAprovacion.modulo.tAprovada+pAprovacion.modulo.tReprovada;
-                          pAprovacion.modulo.porcentaje=((pAprovacion.modulo.tAprovada*100)/totalPruebasModulo);
-                        
-                          if(totalPruebaCurso==0){
-                              if(pAprovacion.modulo.porcentaje>=70){
-                                pAprovacion.curso.pruebaCursoAprovada=false;
-                                pAprovacion.modulo.porcentaje=pAprovacion.modulo.porcentaje-40;
-                              }
-                              
-                                if(pAprovacion.modulo.porcentaje>=70){
-                                      pAprovacion.modulo.aprovado=true
-                                }else{
-                                      pAprovacion.modulo.aprovado=false
+
+                        let pruebasContestadas = curso.pruebasContestadas;
+                        let tpCurso = 0, tpModulo = 0, tpClase = 0;
+                        let pAprovacion = {
+                            curso: {
+                                pruebaCursoAprovada: false,
+                                aprovado: false
+                            },
+                            modulo: {
+                                tAprovada: 0,
+                                tReprovada: 0,
+                                porcentaje: 0,
+                                aprovado: false
+                            }
+                        }
+                        pruebasContestadas.forEach((prueba, idxPrueba) => {
+                            let resultado = false;
+                            if (prueba.resultados.aprovada == true || prueba.resultados.aprovada == 'true') {
+                                resultado = true;
+                            }
+                            if (prueba.type == 'modulo') {
+                                tpModulo = tpModulo + 1;
+                                if (resultado == true) {
+                                    pAprovacion.modulo.tAprovada = pAprovacion.modulo.tAprovada + 1;
+                                } else {
+                                    pAprovacion.modulo.tReprovada = pAprovacion.modulo.tReprovada + 1;
                                 }
-                          }else{
-                            pAprovacion.curso.pruebaCursoAprovada=true;
-                                if(pAprovacion.modulo.porcentaje>=70){
-                                   pAprovacion.modulo.aprovado=true
-                                }else{
-                                   pAprovacion.modulo.aprovado=false
+                            } else if (prueba.type == 'curso') {
+                                tpCurso = tpCurso + 1;
+                                if (resultado == true) {
+                                    pAprovacion.curso.tAprovada = pAprovacion.curso.tAprovada + 1;
+                                } else {
+                                    pAprovacion.curso.tReprovada = pAprovacion.curso.tReprovada + 1;
                                 }
-                          }
-                          
-                           pAprovacion.curso.aprovado=pAprovacion.modulo.aprovado;
-                           curso.terminoCurso.resultados=pAprovacion;
-                           resCliente.cursosSuscrito[idxCurso]=curso;
-                      
-                           mgdClientesOtec.update({"cliente.email":cliente.cliente.email,"identificador.key":identificador},{
-                              $set:{
-                                  "cursosSuscrito":resCliente.cursosSuscrito
-                              }
-                           },(err,raw)=>{
-                              if(err==null){
-                                  method.respuesta({resultadoCurso:resCliente.cursosSuscrito[idxCurso],error:false,mensaje:null});
-                              }else{
-                                   method.respuesta({resultadoCurso:null,error:true,mensaje:'No se pudo obtener los resultados, contacte con la otec'})
-                              }
-                           })
+
+                            }
+                            /*
+                             if(prueba.item.type=='clase'){
+                                 tpClase=tpClase+1;
+                                 if(resultado==true){
+                                    pAprovacion.clase.tAprovada=pAprovacion.clase.tAprovada+1
+                                 }else{
+                                    pAprovacion.clase.tReprovada=pAprovacion.clase.tReprovada+1
+                                 }
+                             }else if(prueba.item.type=='modulo'){
+                                tpModulo=tpModulo+1;
+                                 if(resultado==true){
+                                    pAprovacion.modulo.tAprovada=pAprovacion.modulo.tAprovada+1
+                                 }else{
+                                    pAprovacion.modulo.tReprovada=pAprovacion.modulo.tReprovada+1
+                                 }
+                             }else if(prueba.item.type=='curso'){
+                                tpCurso=tpCurso+1;
+                                   if(resultado==true){
+                                    pAprovacion.clase.tAprovada=pAprovacion.curso.tAprovada+1
+                                 }else{
+                                    pAprovacion.clase.tReprovada=pAprovacion.curso.tReprovada+1
+                                 }
+                                 
+                             }*/
+                        })
+
+                        let totalPruebaCurso = pAprovacion.curso.tAprovada + pAprovacion.curso.tReprovada;
+                        let totalPruebasModulo = pAprovacion.modulo.tAprovada + pAprovacion.modulo.tReprovada;
+                        pAprovacion.modulo.porcentaje = ((pAprovacion.modulo.tAprovada * 100) / totalPruebasModulo);
+
+                        if (totalPruebaCurso == 0) {
+                            if (pAprovacion.modulo.porcentaje >= 70) {
+                                pAprovacion.curso.pruebaCursoAprovada = false;
+                                pAprovacion.modulo.porcentaje = pAprovacion.modulo.porcentaje - 40;
+                            }
+
+                            if (pAprovacion.modulo.porcentaje >= 70) {
+                                pAprovacion.modulo.aprovado = true
+                            } else {
+                                pAprovacion.modulo.aprovado = false
+                            }
+                        } else {
+                            pAprovacion.curso.pruebaCursoAprovada = true;
+                            if (pAprovacion.modulo.porcentaje >= 70) {
+                                pAprovacion.modulo.aprovado = true
+                            } else {
+                                pAprovacion.modulo.aprovado = false
+                            }
+                        }
+
+                        pAprovacion.curso.aprovado = pAprovacion.modulo.aprovado;
+                        curso.terminoCurso.resultados = pAprovacion;
+                        resCliente.cursosSuscrito[idxCurso] = curso;
+
+                        mgdClientesOtec.update({ "cliente.email": cliente.cliente.email, "identificador.key": identificador }, {
+                            $set: {
+                                "cursosSuscrito": resCliente.cursosSuscrito
+                            }
+                        }, (err, raw) => {
+                            if (err == null) {
+                                method.respuesta({ resultadoCurso: resCliente.cursosSuscrito[idxCurso], error: false, mensaje: null });
+                            } else {
+                                method.respuesta({ resultadoCurso: null, error: true, mensaje: 'No se pudo obtener los resultados, contacte con la otec' })
+                            }
+                        })
 
 
 
-                      
 
 
-                       // },10000)
+
+                        // },10000)
 
 
 
@@ -188,33 +243,33 @@ function resultadoTerminoCurso(req,res){
 
 
 
-                       
-                        
-                            
-                            
-                            
-                    
-                          
-                   
-                        
-                         }     
-                }else{
-                    method.respuesta({resultadoCurso:null,error:true,mensaje:'No pudimos obtener los resultado'})
+
+
+
+
+
+
+
+
+
+                    }
+                } else {
+                    method.respuesta({ resultadoCurso: null, error: true, mensaje: 'No pudimos obtener los resultado' })
                 }
-                
-                
-                
-            }else{
-                method.respuesta({resultadoCurso:null,error:true,mensaje:'No pudimos obtener los resultado'})
+
+
+
+            } else {
+                method.respuesta({ resultadoCurso: null, error: true, mensaje: 'No pudimos obtener los resultado' })
             }
         })
-        
-        console.log({resultadoTerminoCursoData:data});
-    }catch(e){
-        method.respuesta({resultadoCurso:null,error:true,mensaje:'No pudimos obtener los resultado'})
+
+        console.log({ resultadoTerminoCursoData: data });
+    } catch (e) {
+        method.respuesta({ resultadoCurso: null, error: true, mensaje: 'No pudimos obtener los resultado' })
     }
-    
-       var method = {
+
+    var method = {
         respuesta: (item) => {
             let strgData = JSON.stringify({ data: { resultadoCurso: item.resultadoCurso, error: item.error, mensaje: item.mensaje } });
             crypto.encode(strgData).then((enc) => {
@@ -224,105 +279,105 @@ function resultadoTerminoCurso(req,res){
                 })
             })
         },
-        calculandoPruebas:(item)=>{
-            return new Promise((resolve,reject)=>{
+        calculandoPruebas: (item) => {
+            return new Promise((resolve, reject) => {
                 console.log('calculando las pruebas ohhhh yeaaa!!!');
-                console.log({calculandoPruebasItem:item});
-                mgdClientesOtec.findOne({"cliente.email":item.email,"identificador.key":item.identificador},(err,resCliente)=>{
-                    if(err==null && resCliente!=null){
+                console.log({ calculandoPruebasItem: item });
+                mgdClientesOtec.findOne({ "cliente.email": item.email, "identificador.key": item.identificador }, (err, resCliente) => {
+                    if (err == null && resCliente != null) {
 
 
-                        let idxCurso = _.findIndex(resCliente.cursosSuscrito,(o)=>{
-                            return o.curso.data.cod_curso==item.curso;
+                        let idxCurso = _.findIndex(resCliente.cursosSuscrito, (o) => {
+                            return o.curso.data.cod_curso == item.curso;
                         })
-                        console.log({idxCursoMantecol:idxCurso});
+                        console.log({ idxCursoMantecol: idxCurso });
                         let cursoItem = resCliente.cursosSuscrito[idxCurso];
-        
-                        if(cursoItem.pruebasContestadas.length>0){
-                            cursoItem.pruebasContestadas.forEach((o,idxPC)=>{
-                                if(Object.keys(o).indexOf('resultados')==-1){
+
+                        if (cursoItem.pruebasContestadas.length > 0) {
+                            cursoItem.pruebasContestadas.forEach((o, idxPC) => {
+                                if (Object.keys(o).indexOf('resultados') == -1) {
                                     let respuestas = null;
-                                    if(Object.keys(o).indexOf('respuestas')!=-1){
-                                    respuestas = o.respuestas;
+                                    if (Object.keys(o).indexOf('respuestas') != -1) {
+                                        respuestas = o.respuestas;
                                     }
 
                                     let preguntas = o.preguntas;
-                                    let pruebaItems= o.prueba;
-                                    let resultados={
-                                        buenas:0,
-                                        malas:0,
-                                        totalPreguntas:0,
-                                        porcentajes:{
-                                            buenas:0,
-                                            malas:0,
-                                      
+                                    let pruebaItems = o.prueba;
+                                    let resultados = {
+                                        buenas: 0,
+                                        malas: 0,
+                                        totalPreguntas: 0,
+                                        porcentajes: {
+                                            buenas: 0,
+                                            malas: 0,
+
                                         },
-                                        aprovada:null
+                                        aprovada: null
                                     };
 
 
-                                    resultados.totalPreguntas=o.preguntas.length;
-                                    console.log({respuesta:respuestas,preguntas:preguntas,pruebaItem:pruebaItems});
-                                    if(respuestas!=null){
-                                            preguntas.forEach((pregunta,idxp)=>{
-                                       respuestas.forEach((respuesta,idxR)=>{
-                                           if(Number.parseInt(pregunta.p.numero)==Number.parseInt(respuesta.p)){
-                                             if(respuesta.c=='true' || respuesta.c==true){
-                                                 resultados.buenas= resultados.buenas+1;
-                                             }else{
-                                                 resultados.malas= resultados.malas+1;
-                                             }
-                                           }else{
-                                             resultados.malas= resultados.malas+1;
-                                           }
-                                       })
-                                    })
-                                    
-                                    }else{
-                                        resultados.buenas=0;
-                                        resultados.malas=o.preguntas.length;
-                                   
-                                    
+                                    resultados.totalPreguntas = o.preguntas.length;
+                                    console.log({ respuesta: respuestas, preguntas: preguntas, pruebaItem: pruebaItems });
+                                    if (respuestas != null) {
+                                        preguntas.forEach((pregunta, idxp) => {
+                                            respuestas.forEach((respuesta, idxR) => {
+                                                if (Number.parseInt(pregunta.p.numero) == Number.parseInt(respuesta.p)) {
+                                                    if (respuesta.c == 'true' || respuesta.c == true) {
+                                                        resultados.buenas = resultados.buenas + 1;
+                                                    } else {
+                                                        resultados.malas = resultados.malas + 1;
+                                                    }
+                                                } else {
+                                                    resultados.malas = resultados.malas + 1;
+                                                }
+                                            })
+                                        })
+
+                                    } else {
+                                        resultados.buenas = 0;
+                                        resultados.malas = o.preguntas.length;
+
+
                                     }
 
-                                    resultados.porcentajes.buenas=((resultados.buenas*100)/preguntas.length);
-                                    resultados.porcentajes.malas=((resultados.malas*100)/preguntas.length);
-                                    if(Number.parseInt( resultados.porcentajes.buenas)> Number.parseInt(70) || Number.parseInt( resultados.porcentajes.buenas)== Number.parseInt(70)){
-                                        resultados.aprovada=true;
-                                    }else{
-                                        resultados.aprovada=false;
+                                    resultados.porcentajes.buenas = ((resultados.buenas * 100) / preguntas.length);
+                                    resultados.porcentajes.malas = ((resultados.malas * 100) / preguntas.length);
+                                    if (Number.parseInt(resultados.porcentajes.buenas) > Number.parseInt(70) || Number.parseInt(resultados.porcentajes.buenas) == Number.parseInt(70)) {
+                                        resultados.aprovada = true;
+                                    } else {
+                                        resultados.aprovada = false;
                                     }
 
-                                    resCliente.cursosSuscrito[idxCurso].pruebasContestadas[idxPC].resultados=resultados;
-                                    mgdClientesOtec.update({"cliente.email":item.email,"identificador.key":item.identificador},{
-                                        $set:{
-                                            "cursosSuscrito":resCliente.cursosSuscrito
+                                    resCliente.cursosSuscrito[idxCurso].pruebasContestadas[idxPC].resultados = resultados;
+                                    mgdClientesOtec.update({ "cliente.email": item.email, "identificador.key": item.identificador }, {
+                                        $set: {
+                                            "cursosSuscrito": resCliente.cursosSuscrito
                                         }
-                                    },(err,raw)=>{
-                                        if(err==null){
+                                    }, (err, raw) => {
+                                        if (err == null) {
                                             //method.respuesta({resPrueba:resCliente.cursosSuscrito[idxCurso].pruebasContestadas[idxPC],error:false,mensaje:null});
-                                        }else{
+                                        } else {
                                             //method.respuesta({resPrueba:null,error:true,mensaje:'No se pudieron obtener los resultados'});
                                         }
                                     })
 
 
-                                    let totales= (cursoItem.pruebasContestadas.length-1);
-                               
-                                      
-                                 
- 
-                                     
+                                    let totales = (cursoItem.pruebasContestadas.length - 1);
+
+
+
+
+
                                 }
-                            
-                               
+
+
                             })
 
                             resolve(true);
                         }
 
 
-                    }else{
+                    } else {
 
                     }
                 })
@@ -332,132 +387,132 @@ function resultadoTerminoCurso(req,res){
     }
 }
 
-function resultadoPrueba(req,res){
+function resultadoPrueba(req, res) {
 
 
-    try{
+    try {
 
         let data = req.body.data;
         let prueba = data.p;
         let cliente = data.u;
         let identificador = cliente.i;
-        let curso = prueba.prueba.cod_curso; 
-        
-        mgdClientesOtec.findOne({"cliente.email":cliente.cliente.email,"identificador.key":identificador},(err,resCliente)=>{
-            if(err==null && resCliente!=null){
-                
-                let idxCurso = _.findIndex(resCliente.cursosSuscrito,(o)=>{
-                    return o.curso.data.cod_curso==curso;
+        let curso = prueba.prueba.cod_curso;
+
+        mgdClientesOtec.findOne({ "cliente.email": cliente.cliente.email, "identificador.key": identificador }, (err, resCliente) => {
+            if (err == null && resCliente != null) {
+
+                let idxCurso = _.findIndex(resCliente.cursosSuscrito, (o) => {
+                    return o.curso.data.cod_curso == curso;
                 })
                 let cursoItem = resCliente.cursosSuscrito[idxCurso];
 
-                if(cursoItem.pruebasContestadas.length>0){
+                if (cursoItem.pruebasContestadas.length > 0) {
 
-                    let idxPC = _.findIndex(cursoItem.pruebasContestadas,(o)=>{
-                        return o.prueba.codPrueba==prueba.prueba.codPrueba;
+                    let idxPC = _.findIndex(cursoItem.pruebasContestadas, (o) => {
+                        return o.prueba.codPrueba == prueba.prueba.codPrueba;
                     });
-                    
-                    let pruebaContestada= cursoItem.pruebasContestadas[idxPC];
 
-                    if(idxPC!=-1){
-                       let idxResult=  Object.keys(pruebaContestada).indexOf('resultados');
-                        if(idxResult!=-1){
+                    let pruebaContestada = cursoItem.pruebasContestadas[idxPC];
+
+                    if (idxPC != -1) {
+                        let idxResult = Object.keys(pruebaContestada).indexOf('resultados');
+                        if (idxResult != -1) {
                             //entregamos los resultados
-                            method.respuesta({resPrueba:pruebaContestada,error:false,mensaje:null});
-                        }else{
+                            method.respuesta({ resPrueba: pruebaContestada, error: false, mensaje: null });
+                        } else {
                             //hacer calculo
                             let respuestas = null;
-                             if(Object.keys(pruebaContestada).indexOf('respuestas')!=-1){
-                             respuestas = pruebaContestada.respuestas;
-                             }
-                            
-                            let preguntas = pruebaContestada.preguntas;
-                            let pruebaItems= pruebaContestada.prueba;
-                            let resultados={
-                                buenas:0,
-                                malas:0,
-                                totalPreguntas:0,
-                                porcentajes:{
-                                    buenas:0,
-                                    malas:0,
-                              
-                                },
-                                aprovada:null
-                            };
-                            resultados.totalPreguntas=pruebaContestada.preguntas.length;
-                            console.log({respuesta:respuestas,preguntas:preguntas,pruebaItem:pruebaItems});
-                            if(respuestas!=null){
-                                    preguntas.forEach((pregunta,idxp)=>{
-                               respuestas.forEach((respuesta,idxR)=>{
-                                   if(Number.parseInt(pregunta.p.numero)==Number.parseInt(respuesta.p)){
-                                     if(respuesta.c=='true' || respuesta.c==true){
-                                         resultados.buenas= resultados.buenas+1;
-                                     }else{
-                                         resultados.malas= resultados.malas+1;
-                                     }
-                                   }else{
-                                     resultados.malas= resultados.malas+1;
-                                   }
-                               })
-                            })
-                            
-                            }else{
-                                resultados.buenas=0;
-                                resultados.malas=pruebaContestada.preguntas.length;
-                           
-                            
+                            if (Object.keys(pruebaContestada).indexOf('respuestas') != -1) {
+                                respuestas = pruebaContestada.respuestas;
                             }
-                    
-                            resultados.porcentajes.buenas=((resultados.buenas*100)/preguntas.length);
-                            resultados.porcentajes.malas=((resultados.malas*100)/preguntas.length);
-                            if(Number.parseInt( resultados.porcentajes.buenas)> Number.parseInt(70) || Number.parseInt( resultados.porcentajes.buenas)== Number.parseInt(70)){
-                                resultados.aprovada=true;
-                            }else{
-                                resultados.aprovada=false;
+
+                            let preguntas = pruebaContestada.preguntas;
+                            let pruebaItems = pruebaContestada.prueba;
+                            let resultados = {
+                                buenas: 0,
+                                malas: 0,
+                                totalPreguntas: 0,
+                                porcentajes: {
+                                    buenas: 0,
+                                    malas: 0,
+
+                                },
+                                aprovada: null
+                            };
+                            resultados.totalPreguntas = pruebaContestada.preguntas.length;
+                            console.log({ respuesta: respuestas, preguntas: preguntas, pruebaItem: pruebaItems });
+                            if (respuestas != null) {
+                                preguntas.forEach((pregunta, idxp) => {
+                                    respuestas.forEach((respuesta, idxR) => {
+                                        if (Number.parseInt(pregunta.p.numero) == Number.parseInt(respuesta.p)) {
+                                            if (respuesta.c == 'true' || respuesta.c == true) {
+                                                resultados.buenas = resultados.buenas + 1;
+                                            } else {
+                                                resultados.malas = resultados.malas + 1;
+                                            }
+                                        } else {
+                                            resultados.malas = resultados.malas + 1;
+                                        }
+                                    })
+                                })
+
+                            } else {
+                                resultados.buenas = 0;
+                                resultados.malas = pruebaContestada.preguntas.length;
+
+
+                            }
+
+                            resultados.porcentajes.buenas = ((resultados.buenas * 100) / preguntas.length);
+                            resultados.porcentajes.malas = ((resultados.malas * 100) / preguntas.length);
+                            if (Number.parseInt(resultados.porcentajes.buenas) > Number.parseInt(70) || Number.parseInt(resultados.porcentajes.buenas) == Number.parseInt(70)) {
+                                resultados.aprovada = true;
+                            } else {
+                                resultados.aprovada = false;
                             }
 
                             //actualizamos
-                            resCliente.cursosSuscrito[idxCurso].pruebasContestadas[idxPC].resultados=resultados;
-                            mgdClientesOtec.update({"cliente.email":cliente.cliente.email,"identificador.key":identificador},{
-                                $set:{
-                                    "cursosSuscrito":resCliente.cursosSuscrito
+                            resCliente.cursosSuscrito[idxCurso].pruebasContestadas[idxPC].resultados = resultados;
+                            mgdClientesOtec.update({ "cliente.email": cliente.cliente.email, "identificador.key": identificador }, {
+                                $set: {
+                                    "cursosSuscrito": resCliente.cursosSuscrito
                                 }
-                            },(err,raw)=>{
-                                if(err==null){
-                                    method.respuesta({resPrueba:resCliente.cursosSuscrito[idxCurso].pruebasContestadas[idxPC],error:false,mensaje:null});
-                                }else{
-                                    method.respuesta({resPrueba:null,error:true,mensaje:'No se pudieron obtener los resultados'});
+                            }, (err, raw) => {
+                                if (err == null) {
+                                    method.respuesta({ resPrueba: resCliente.cursosSuscrito[idxCurso].pruebasContestadas[idxPC], error: false, mensaje: null });
+                                } else {
+                                    method.respuesta({ resPrueba: null, error: true, mensaje: 'No se pudieron obtener los resultados' });
                                 }
                             })
 
                             //entregamos resultados
                         }
 
-                  
 
 
-                    }else{
+
+                    } else {
                         //entregamos resultados negativo
-                        method.respuesta({resPrueba:null,error:true,mensaje:'No se pudieron obtener los resultados'});
+                        method.respuesta({ resPrueba: null, error: true, mensaje: 'No se pudieron obtener los resultados' });
                     }
 
 
-                }else{
+                } else {
                     //entregamos resultado negativo
-                    method.respuesta({resPrueba:null,error:true,mensaje:'No se pudieron obtener los resultados'});
+                    method.respuesta({ resPrueba: null, error: true, mensaje: 'No se pudieron obtener los resultados' });
                 }
 
-    
-            }else{
+
+            } else {
                 //entregamos resultado negativo
-                method.respuesta({resPrueba:null,error:true,mensaje:'No se pudieron obtener los resultados'});
+                method.respuesta({ resPrueba: null, error: true, mensaje: 'No se pudieron obtener los resultados' });
             }
         })
-        
-        
-    }catch(e){
 
-        method.respuesta({resPrueba:null,error:true,mensaje:null});
+
+    } catch (e) {
+
+        method.respuesta({ resPrueba: null, error: true, mensaje: null });
 
     }
 
@@ -477,117 +532,117 @@ function resultadoPrueba(req,res){
 
 }
 
-function terminarPrueba(req,res){
+function terminarPrueba(req, res) {
 
-    try{
+    try {
         let data = req.body.data;
         let respuestas = data.p.respuestas;
-        let cliente= data.p.prueba.cliente;
-        let identificador= data.p.prueba.i;
-        let pruebaActiva= data.p.prueba.pruebaActiva;
-        let pruebaCodigo=data.p.pruebaCodigo;
+        let cliente = data.p.prueba.cliente;
+        let identificador = data.p.prueba.i;
+        let pruebaActiva = data.p.prueba.pruebaActiva;
+        let pruebaCodigo = data.p.pruebaCodigo;
         let preguntas = data.p.preguntas;
 
-        console.log({data:data,respuestas:respuestas,cliente:cliente,indentificador:identificador,pruebaActiva:pruebaActiva,preguntas:preguntas});
-        mgdClientesOtec.findOne({"cliente.email":cliente.email,"identificador.key":identificador},(err,resCliente)=>{
-           
-            if(resCliente!=null){
-               let idxCurso= _.findIndex(resCliente.cursosSuscrito,(o)=>{
-                   return o.curso.data.cod_curso==pruebaCodigo.prueba.cod_curso;
-               })
+        console.log({ data: data, respuestas: respuestas, cliente: cliente, indentificador: identificador, pruebaActiva: pruebaActiva, preguntas: preguntas });
+        mgdClientesOtec.findOne({ "cliente.email": cliente.email, "identificador.key": identificador }, (err, resCliente) => {
 
-               if(idxCurso!=-1){
+            if (resCliente != null) {
+                let idxCurso = _.findIndex(resCliente.cursosSuscrito, (o) => {
+                    return o.curso.data.cod_curso == pruebaCodigo.prueba.cod_curso;
+                })
+
+                if (idxCurso != -1) {
                     let curso = resCliente.cursosSuscrito[idxCurso];
-                    let obInsert={
-                        item:null,
-                        prueba:null,
-                        type:null,
-                        idxs:null,
-                        respuestas:respuestas,
-                        preguntas:preguntas,
-                        temPruebaInit:resCliente.temPruebaInit
+                    let obInsert = {
+                        item: null,
+                        prueba: null,
+                        type: null,
+                        idxs: null,
+                        respuestas: respuestas,
+                        preguntas: preguntas,
+                        temPruebaInit: resCliente.temPruebaInit
 
                     }
 
 
-                    var pruebaMethod={
-                        insert:(objeto)=>{
-                            if(curso.pruebasContestadas.length==0){
+                    var pruebaMethod = {
+                        insert: (objeto) => {
+                            if (curso.pruebasContestadas.length == 0) {
 
                                 curso.pruebasContestadas.push(objeto);
-                                resCliente.cursosSuscrito[idxCurso]=curso;
-                                mgdClientesOtec.update({"cliente.email":cliente.email,"identificador.key":identificador},{
-                                    $set:{
-                                        "cursosSuscrito":resCliente.cursosSuscrito,
-                                        "temPruebaInit":null
+                                resCliente.cursosSuscrito[idxCurso] = curso;
+                                mgdClientesOtec.update({ "cliente.email": cliente.email, "identificador.key": identificador }, {
+                                    $set: {
+                                        "cursosSuscrito": resCliente.cursosSuscrito,
+                                        "temPruebaInit": null
                                     }
-                                },(error,raw)=>{
-                                    mgdClientesOtec.findOne({"cliente.email":cliente.email,"identificador.key":identificador},(err,resCliente)=>{
-                                        if(err==null && resCliente!=null){
-                                            if(error==null){
-                                                console.log({actualizacion:raw});
-                                                pruebaMethod.respuesta({ curso:resCliente.cursosSuscrito[idxCurso], error:false, mensaje:'Se a registrado su prueba con exito' });
-                                                
-                                               
-                                            }else{
-                                                console.log({actualizacion:raw,mensaje:'no actualizo nada'});
-                                                pruebaMethod.respuesta({ curso:resCliente.cursosSuscrito[idxCurso], error:true, mensaje:'No se pudo registrar la prueba' });
+                                }, (error, raw) => {
+                                    mgdClientesOtec.findOne({ "cliente.email": cliente.email, "identificador.key": identificador }, (err, resCliente) => {
+                                        if (err == null && resCliente != null) {
+                                            if (error == null) {
+                                                console.log({ actualizacion: raw });
+                                                pruebaMethod.respuesta({ curso: resCliente.cursosSuscrito[idxCurso], error: false, mensaje: 'Se a registrado su prueba con exito' });
+
+
+                                            } else {
+                                                console.log({ actualizacion: raw, mensaje: 'no actualizo nada' });
+                                                pruebaMethod.respuesta({ curso: resCliente.cursosSuscrito[idxCurso], error: true, mensaje: 'No se pudo registrar la prueba' });
                                             }
-                                           
-                                        }else{
-                                            pruebaMethod.respuesta({ curso:null, error:true, mensaje:'No se pudo obtener la lista de cursos' });
+
+                                        } else {
+                                            pruebaMethod.respuesta({ curso: null, error: true, mensaje: 'No se pudo obtener la lista de cursos' });
                                         }
-                                    
-                                   
-                                })
-                                
-                                })
 
 
+                                    })
 
-
-                          
-                            }else{
-                                let idxPrueba= _.findIndex(curso.pruebasContestadas,(o)=>{
-                                    return o.prueba.codPrueba==pruebaCodigo.prueba.codPrueba;
                                 })
 
-                                if(idxPrueba==-1){
+
+
+
+
+                            } else {
+                                let idxPrueba = _.findIndex(curso.pruebasContestadas, (o) => {
+                                    return o.prueba.codPrueba == pruebaCodigo.prueba.codPrueba;
+                                })
+
+                                if (idxPrueba == -1) {
                                     curso.pruebasContestadas.push(objeto);
-                                    resCliente.cursosSuscrito[idxCurso]=curso;
-                                    mgdClientesOtec.update({"cliente.email":cliente.email,"identificador.key":identificador},{
-                                        $set:{
-                                            "cursosSuscrito":resCliente.cursosSuscrito,
-                                            "temPruebaInit":null
+                                    resCliente.cursosSuscrito[idxCurso] = curso;
+                                    mgdClientesOtec.update({ "cliente.email": cliente.email, "identificador.key": identificador }, {
+                                        $set: {
+                                            "cursosSuscrito": resCliente.cursosSuscrito,
+                                            "temPruebaInit": null
                                         }
-                                    },(error,raw)=>{
-                                        mgdClientesOtec.findOne({"cliente.email":cliente.email,"identificador.key":identificador},(err,resCliente)=>{
-                                            if(err==null && resCliente!=null){
-                                                if(error==null){
-                                                    console.log({actualizacion:raw});
-                                                    pruebaMethod.respuesta({ curso:resCliente.cursosSuscrito[idxCurso], error:false, mensaje:null });
-                                                    
-                                                   
-                                                }else{
-                                                    console.log({actualizacion:raw,mensaje:'no actualizo nada'});
-                                                    pruebaMethod.respuesta({ curso:resCliente.cursosSuscrito[idxCurso], error:true, mensaje:'No se pudo registrar la prueba' });
+                                    }, (error, raw) => {
+                                        mgdClientesOtec.findOne({ "cliente.email": cliente.email, "identificador.key": identificador }, (err, resCliente) => {
+                                            if (err == null && resCliente != null) {
+                                                if (error == null) {
+                                                    console.log({ actualizacion: raw });
+                                                    pruebaMethod.respuesta({ curso: resCliente.cursosSuscrito[idxCurso], error: false, mensaje: null });
+
+
+                                                } else {
+                                                    console.log({ actualizacion: raw, mensaje: 'no actualizo nada' });
+                                                    pruebaMethod.respuesta({ curso: resCliente.cursosSuscrito[idxCurso], error: true, mensaje: 'No se pudo registrar la prueba' });
                                                 }
-                                               
-                                            }else{
-                                                pruebaMethod.respuesta({ curso:null, error:true, mensaje:'No se pudo obtener la lista de cursos' });
+
+                                            } else {
+                                                pruebaMethod.respuesta({ curso: null, error: true, mensaje: 'No se pudo obtener la lista de cursos' });
                                             }
-                                        
-                                       
+
+
+                                        })
+
                                     })
-                                    
-                                    })
-                                }else{
-                                    pruebaMethod.respuesta({ curso:resCliente.cursosSuscrito[idxCurso], error:true, mensaje:'La prueba ya se encuntra registrada' });
+                                } else {
+                                    pruebaMethod.respuesta({ curso: resCliente.cursosSuscrito[idxCurso], error: true, mensaje: 'La prueba ya se encuntra registrada' });
                                 }
-                            
+
                             }
-                            
-                          
+
+
                         },
                         respuesta: (item) => {
                             let strgData = JSON.stringify({ data: { curso: item.curso, error: item.error, mensaje: item.mensaje } });
@@ -601,96 +656,96 @@ function terminarPrueba(req,res){
                     }
 
 
-                    curso.esquema.modulos.forEach((modulo,idxM)=>{
-                        modulo.pruebas.forEach((pb,idxpb)=>{
-                            if(pb.prueba.codPrueba==pruebaCodigo.prueba.codPrueba){
-                                obInsert.item=modulo.modulo;
-                                obInsert.prueba=pb.prueba;
-                                obInsert.type='modulo';
-                                let idxs={
-                                    idxCurso:idxCurso,
-                                    idxModulo:idxM,
-                                    idxPrueba:idxpb
+                    curso.esquema.modulos.forEach((modulo, idxM) => {
+                        modulo.pruebas.forEach((pb, idxpb) => {
+                            if (pb.prueba.codPrueba == pruebaCodigo.prueba.codPrueba) {
+                                obInsert.item = modulo.modulo;
+                                obInsert.prueba = pb.prueba;
+                                obInsert.type = 'modulo';
+                                let idxs = {
+                                    idxCurso: idxCurso,
+                                    idxModulo: idxM,
+                                    idxPrueba: idxpb
                                 }
-                                obInsert.idxs=idxs;
-                                let indexPrueba= idxpb+1;
-                                if(modulo.pruebas.length==indexPrueba){
-                                    curso.esquema.modulos[idxM].completado=true;
+                                obInsert.idxs = idxs;
+                                let indexPrueba = idxpb + 1;
+                                if (modulo.pruebas.length == indexPrueba) {
+                                    curso.esquema.modulos[idxM].completado = true;
                                 }
-                                curso.esquema.modulos[idxM].pruebas[idxpb].completado=true;
+                                curso.esquema.modulos[idxM].pruebas[idxpb].completado = true;
 
-                                pruebaMethod.insert(obInsert); 
+                                pruebaMethod.insert(obInsert);
                             }
                         })
-                        modulo.clases.forEach((clase,idxcla)=>{
-                            clase.pruebas.forEach((pb,idxpc)=>{
-                                if(pb.prueba.codPrueba==pruebaCodigo.prueba.codPrueba){
-                                    obInsert.item={modulo:modulo.modulo, clase:clase.clase};
-                                    obInsert.prueba=pb.prueba;
-                                    obInsert.type='clase';
-                                    let idxs={
-                                        idxCurso:idxCurso,
-                                        idxModulo:idxM,
-                                        idxClase:idxcla,
-                                        idxPrueba:idxpc
+                        modulo.clases.forEach((clase, idxcla) => {
+                            clase.pruebas.forEach((pb, idxpc) => {
+                                if (pb.prueba.codPrueba == pruebaCodigo.prueba.codPrueba) {
+                                    obInsert.item = { modulo: modulo.modulo, clase: clase.clase };
+                                    obInsert.prueba = pb.prueba;
+                                    obInsert.type = 'clase';
+                                    let idxs = {
+                                        idxCurso: idxCurso,
+                                        idxModulo: idxM,
+                                        idxClase: idxcla,
+                                        idxPrueba: idxpc
                                     }
-                                    obInsert.idxs=idxs;
-                                    let indexPrueba= idxpc+1;
-                                    if(clase.pruebas.length==indexPrueba){
-                                        curso.esquema.modulos[idxM].clases[idxcla].completado=true;
+                                    obInsert.idxs = idxs;
+                                    let indexPrueba = idxpc + 1;
+                                    if (clase.pruebas.length == indexPrueba) {
+                                        curso.esquema.modulos[idxM].clases[idxcla].completado = true;
                                     }
-                                    curso.esquema.modulos[idxM].clases[idxcla].pruebas[idxpc].completado=true;
+                                    curso.esquema.modulos[idxM].clases[idxcla].pruebas[idxpc].completado = true;
                                     pruebaMethod.insert(obInsert);
                                 }
                             })
                         })
                     })
 
-                    curso.esquema.pruebas.forEach((pb,idxpb)=>{
-                        if(pb.prueba.codPrueba==pruebaCodigo.prueba.codPrueba){
-                            obInsert.item=curso.esquema.curso;
-                            obInsert.prueba=pb.prueba;
-                            obInsert.type='curso';
-                            let idxs={
-                                idxCurso:idxCurso,
-                                idxPrueba:idxpb
+                    curso.esquema.pruebas.forEach((pb, idxpb) => {
+                        if (pb.prueba.codPrueba == pruebaCodigo.prueba.codPrueba) {
+                            obInsert.item = curso.esquema.curso;
+                            obInsert.prueba = pb.prueba;
+                            obInsert.type = 'curso';
+                            let idxs = {
+                                idxCurso: idxCurso,
+                                idxPrueba: idxpb
                             }
-                            obInsert.idxs=idxs;
-                            let indexPrueba= idxpb+1;
-                            if(curso.esquema.pruebas.length==indexPrueba){
-                                curso.esquema.completado=true;
-                                fechaHoy().then((fecha)=>{
-                                    curso.terminoCurso.fecha=fecha;
+                            obInsert.idxs = idxs;
+                            let indexPrueba = idxpb + 1;
+                            if (curso.esquema.pruebas.length == indexPrueba) {
+                                curso.esquema.completado = true;
+                                fechaHoy().then((fecha) => {
+                                    curso.terminoCurso.fecha = fecha;
                                 })
-                                
+
                             }
-                            curso.esquema.pruebas[idxpb].completado=true;
+                            curso.esquema.pruebas[idxpb].completado = true;
                             pruebaMethod.insert(obInsert);
                         }
                     })
 
-            
 
 
 
-               }
 
-               
+                }
+
+
             }
         })
 
 
 
-    }catch(e){
-        pruebaMethod.respuesta({ curso:null, error:true, mensaje:'Hubo un error al registrar la prueba' });
-        
+    } catch (e) {
+        pruebaMethod.respuesta({ curso: null, error: true, mensaje: 'Hubo un error al registrar la prueba' });
+
     }
-  
 
 
 
 
-    
+
+
 }
 
 function login(req, res) {
@@ -726,8 +781,8 @@ function login(req, res) {
                 } catch (e) {
                     pruebaEjecut = false;
                 }
-                fechaHoy().then((fecha)=>{
-                    let cliente = { cliente: resCliente[0].cliente, i: resCliente[0].identificador.key, rol: resCliente[0].rol, pruebaActiva:resCliente[0].temPruebaInit,fechaHoy:fecha };
+                fechaHoy().then((fecha) => {
+                    let cliente = { cliente: resCliente[0].cliente, i: resCliente[0].identificador.key, rol: resCliente[0].rol, pruebaActiva: resCliente[0].temPruebaInit, fechaHoy: fecha };
                     let strgData = JSON.stringify({ data: { client: cliente, i: true } });
                     crypto.encode(strgData).then((enc) => {
                         res.json({
@@ -737,7 +792,7 @@ function login(req, res) {
                         })
                     })
                 })
-               
+
             } else {
                 let strgData = JSON.stringify({ data: { client: null, i: false } });
                 crypto.encode(strgData).then((enc) => {
@@ -767,8 +822,8 @@ function login(req, res) {
 function informartiempo(req, res) {
     console.log({ informarTiempo: req.body });
 
-    try{
-        
+    try {
+
 
         let user = req.body.data.u;
         let time = req.body.data.tiempo.tiempo;
@@ -777,7 +832,7 @@ function informartiempo(req, res) {
         let identificadorApp = req.body.IdentificadorApp;
         let identificador = req.body.ident;
         let cnt = req.body.data.tiempo.cnt;
-    
+
         console.log({ user: user, time: time, clase: clase, curso: curso, identificadorApp: identificadorApp, identificador: identificador, cnt: cnt });
         mgdClientesOtec.findOne({ "cliente.rut": user.cliente.rut, "identificador.key": identificador }, (err, resEstudiante) => {
             if (err == null && resEstudiante != null) {
@@ -788,8 +843,8 @@ function informartiempo(req, res) {
                 if (idxCurso > -1) {
                     let cursoUpdate = resEstudiante.cursosSuscrito[idxCurso];
                     cursoUpdate.esquema.modulos[cnt.im].clases[cnt.ic].clase.horasClaseSegundos = time;
-                    resEstudiante.cursosSuscrito[idxCurso]=method.____updateEsquema(cursoUpdate);
-                     
+                    resEstudiante.cursosSuscrito[idxCurso] = method.____updateEsquema(cursoUpdate);
+
                     mgdClientesOtec.update({ "cliente.rut": user.cliente.rut, "identificador.key": identificador }, {
                         $set: {
                             "cursosSuscrito": resEstudiante.cursosSuscrito
@@ -815,7 +870,7 @@ function informartiempo(req, res) {
 
 
 
-    }catch(e){
+    } catch (e) {
         method.respuesta({ curso: null, error: true, mensaje: 'Ocurrio un error al realizarce la actualización del tiempo' });
     }
 
@@ -830,38 +885,38 @@ function informartiempo(req, res) {
                 })
             })
         },
-        ____updateEsquema:(curso)=>{
+        ____updateEsquema: (curso) => {
             /**
              * Verifica si existen pruebas que no se han rendido en el curso, modulos y clases, si no hay
              * actualiza el esquema
              */
-            let esquema=curso;
-            let modulosComplete= new Array();
-            esquema.esquema.modulos.forEach((modulo, idxModulo)=>{
-                let clasesComplete=new Array();
-                modulo.clases.forEach((clase,idxClase)=>{
-                    if(clase.clase.horasclaseSegundos==0 || clase.clase.horasclaseSegundos == "0"){
-                        if(clase.pruebas.length==0){
-                            esquema.esquema.modulos[idxModulo].clases[idxClase].completado=true;
+            let esquema = curso;
+            let modulosComplete = new Array();
+            esquema.esquema.modulos.forEach((modulo, idxModulo) => {
+                let clasesComplete = new Array();
+                modulo.clases.forEach((clase, idxClase) => {
+                    if (clase.clase.horasclaseSegundos == 0 || clase.clase.horasclaseSegundos == "0") {
+                        if (clase.pruebas.length == 0) {
+                            esquema.esquema.modulos[idxModulo].clases[idxClase].completado = true;
 
                         }
                     }
-                    clasesComplete.push(esquema.esquema.modulos[idxModulo].clases[idxClase].completado);                    
+                    clasesComplete.push(esquema.esquema.modulos[idxModulo].clases[idxClase].completado);
                 })
 
 
-                if(esquema.esquema.modulos[idxModulo].pruebas.length==0 && clasesComplete.indexOf(false)==-1){
-                    esquema.esquema.modulos[idxModulo].completado==true;
+                if (esquema.esquema.modulos[idxModulo].pruebas.length == 0 && clasesComplete.indexOf(false) == -1) {
+                    esquema.esquema.modulos[idxModulo].completado == true;
                 }
 
                 modulosComplete.push(esquema.esquema.modulos[idxModulo].completado);
 
             })
 
-            if(esquema.esquema.pruebas.length==0 && modulosComplete.indexOf(false)==-1){
-                esquema.esquema.completado=true;
+            if (esquema.esquema.pruebas.length == 0 && modulosComplete.indexOf(false) == -1) {
+                esquema.esquema.completado = true;
             }
-            esquema.terminoCurso.fecha= fechaHoyNoPromise();
+            esquema.terminoCurso.fecha = fechaHoyNoPromise();
 
             return esquema;
 
@@ -887,8 +942,8 @@ function dataHoraPMethod(prueba) {
                         fecha: moment(data).format('MM-DD-YYYY'),
                         hInicio: moment(data).format('HH:mm:ss').split(':'),
                         hFinal: moment(data).seconds(calSP).format('HH:mm:ss').split(':'),
-                        hIniciosp:moment(data).format('HH:mm:ss'),
-                        hFinalsp:moment(data).seconds(calSP).format('HH:mm:ss'),
+                        hIniciosp: moment(data).format('HH:mm:ss'),
+                        hFinalsp: moment(data).seconds(calSP).format('HH:mm:ss'),
                         segundosPrueba: calSP
                     }
                     resolve(jData);
@@ -902,38 +957,38 @@ function dataHoraPMethod(prueba) {
     })
 }
 
-function fechaHoy(){
-    return new Promise((resolve,reject)=>{
+function fechaHoy() {
+    return new Promise((resolve, reject) => {
         let jData;
         let server = ['cl.pool.ntp.org', 'south-america.pool.ntp.org', 'ntp.shoa.cl'];
-       
-            ntpClient.getNetworkTime(server[2], 123, (err, data) => {
-                jData = {
-                    fechaHoy: moment(data).format('MM-DD-YYYY'),
-                    horahoy: moment(data).format('HH:mm:ss').split(':'),
-                    horahoyses:moment(data).format('HH:mm:ss')
-    
-                }
-                resolve(jData);
-            })
+
+        ntpClient.getNetworkTime(server[2], 123, (err, data) => {
+            jData = {
+                fechaHoy: moment(data).format('MM-DD-YYYY'),
+                horahoy: moment(data).format('HH:mm:ss').split(':'),
+                horahoyses: moment(data).format('HH:mm:ss')
+
+            }
+            resolve(jData);
+        })
     })
 
 
 }
 
-function fechaHoyNoPromise(){
+function fechaHoyNoPromise() {
     let jData;
-        let server = ['cl.pool.ntp.org', 'south-america.pool.ntp.org', 'ntp.shoa.cl'];
-        ntpClient.getNetworkTime(server[2], 123, (err, data) => {
-            jData = {
-                fechaHoy: moment(data).format('MM-DD-YYYY'),
-                horahoy: moment(data).format('HH:mm:ss').split(':'),
-                horahoyses:moment(data).format('HH:mm:ss')
+    let server = ['cl.pool.ntp.org', 'south-america.pool.ntp.org', 'ntp.shoa.cl'];
+    ntpClient.getNetworkTime(server[2], 123, (err, data) => {
+        jData = {
+            fechaHoy: moment(data).format('MM-DD-YYYY'),
+            horahoy: moment(data).format('HH:mm:ss').split(':'),
+            horahoyses: moment(data).format('HH:mm:ss')
 
-            }
-        })
+        }
+    })
 
-        return jData;
+    return jData;
 }
 
 
@@ -949,69 +1004,69 @@ function getPruebaTest(req, res) {
         mgdClientesOtec.findOne({ "cliente.email": cliente.email, "identificador.key": identificador }, (err, resCliente) => {
             if (resCliente != null) {
                 let cod_curso = prueba.cod_curso;
-                let idxCurso = _.findIndex(resCliente.cursosSuscrito,(o)=>{
-                    return o.esquema.curso.cod_curso==cod_curso;
+                let idxCurso = _.findIndex(resCliente.cursosSuscrito, (o) => {
+                    return o.esquema.curso.cod_curso == cod_curso;
                 })
 
-                if(idxCurso>-1){
-                    let resCurso= resCliente.cursosSuscrito[idxCurso].esquema;
-                    fechaHoy().then((fechaHoyItem)=>{
-                     
-                            resCurso.modulos.forEach((m, idxm) => {
-                                m.pruebas.forEach((pm, pmidx) => {
-                                    if (pm.prueba.codPrueba == prueba.codPrueba) {
-                                        if (resCliente.temPruebaInit == null) {
-                                        
-                                            method.setPruebaActivate({ email: cliente.email, identificador: identificador, prueba: { prueba: pm, idx: { idxp: pmidx, idxModulo: idxm }, type: 'modulo',fecha:fechaHoyItem } });
-                                        } else {
-                                            method.respuesta({ prueba: { prueba: pm, idx: { idxp: pmidx, idxModulo: idxm }, type: 'modulo',fecha:fechaHoyItem }, error: false, mensaje: null, temPruebaInit: resCliente.temPruebaInit });
-                                        }
-    
-                                    }
-                                })
-                                m.clases.forEach((cla, idxCla) => {
-                                    cla.pruebas.forEach((pcla, pIdxCla) => {
-                                        if (pcla.prueba.codPrueba == prueba.codPrueba) {
-                                            if (resCliente.temPruebaInit == null) {
-                                                method.setPruebaActivate({ email: cliente.email, identificador: identificador, prueba: { prueba: pcla, idx: { idxp: pIdxCla, idxClase: idxCla, idxModulo: idxm }, type: 'clase',fecha:fechaHoyItem } });
-                                            } else {
-                                                method.respuesta({ prueba: { prueba: pcla, idx: { idxp: pIdxCla, idxClase: idxCla, idxModulo: idxm }, type: 'clase',fecha:fechaHoyItem }, error: false, mensaje: null, temPruebaInit: resCliente.temPruebaInit });
-                                            }
-    
-                                        }
-                                    })
-                                })
-                            })
-                            resCurso.pruebas.forEach((pcur, idxpcur) => {
-                                if (pcur.prueba.codPrueba == prueba.codPrueba) {
+                if (idxCurso > -1) {
+                    let resCurso = resCliente.cursosSuscrito[idxCurso].esquema;
+                    fechaHoy().then((fechaHoyItem) => {
+
+                        resCurso.modulos.forEach((m, idxm) => {
+                            m.pruebas.forEach((pm, pmidx) => {
+                                if (pm.prueba.codPrueba == prueba.codPrueba) {
                                     if (resCliente.temPruebaInit == null) {
-                                        method.setPruebaActivate({ email: cliente.email, identificador: identificador, prueba: { prueba: pcur, idx: { idxp: idxpcur }, type: 'curso',fecha:fechaHoyItem } });
+
+                                        method.setPruebaActivate({ email: cliente.email, identificador: identificador, prueba: { prueba: pm, idx: { idxp: pmidx, idxModulo: idxm }, type: 'modulo', fecha: fechaHoyItem } });
                                     } else {
-                                        method.respuesta({ prueba: { prueba: pcur, idx: { idxp: idxpcur }, type: 'curso',fecha:fechaHoyItem }, error: false, mensaje: null, temPruebaInit: resCliente.temPruebaInit });
+                                        method.respuesta({ prueba: { prueba: pm, idx: { idxp: pmidx, idxModulo: idxm }, type: 'modulo', fecha: fechaHoyItem }, error: false, mensaje: null, temPruebaInit: resCliente.temPruebaInit });
                                     }
-    
+
                                 }
                             })
-                      
-    
-                    }).catch(()=>{
-                        method.respuesta({ prueba: null, error: true, mensaje: null,temPruebaInit:null });
+                            m.clases.forEach((cla, idxCla) => {
+                                cla.pruebas.forEach((pcla, pIdxCla) => {
+                                    if (pcla.prueba.codPrueba == prueba.codPrueba) {
+                                        if (resCliente.temPruebaInit == null) {
+                                            method.setPruebaActivate({ email: cliente.email, identificador: identificador, prueba: { prueba: pcla, idx: { idxp: pIdxCla, idxClase: idxCla, idxModulo: idxm }, type: 'clase', fecha: fechaHoyItem } });
+                                        } else {
+                                            method.respuesta({ prueba: { prueba: pcla, idx: { idxp: pIdxCla, idxClase: idxCla, idxModulo: idxm }, type: 'clase', fecha: fechaHoyItem }, error: false, mensaje: null, temPruebaInit: resCliente.temPruebaInit });
+                                        }
+
+                                    }
+                                })
+                            })
+                        })
+                        resCurso.pruebas.forEach((pcur, idxpcur) => {
+                            if (pcur.prueba.codPrueba == prueba.codPrueba) {
+                                if (resCliente.temPruebaInit == null) {
+                                    method.setPruebaActivate({ email: cliente.email, identificador: identificador, prueba: { prueba: pcur, idx: { idxp: idxpcur }, type: 'curso', fecha: fechaHoyItem } });
+                                } else {
+                                    method.respuesta({ prueba: { prueba: pcur, idx: { idxp: idxpcur }, type: 'curso', fecha: fechaHoyItem }, error: false, mensaje: null, temPruebaInit: resCliente.temPruebaInit });
+                                }
+
+                            }
+                        })
+
+
+                    }).catch(() => {
+                        method.respuesta({ prueba: null, error: true, mensaje: null, temPruebaInit: null });
                     })
-                }else{
+                } else {
                     //enviar respuesta curso no encontrado
-                    method.respuesta({ prueba: null, error: true, mensaje: null,temPruebaInit:null });
+                    method.respuesta({ prueba: null, error: true, mensaje: null, temPruebaInit: null });
                 }
 
-             
+
             } else {
-                method.respuesta({ prueba: null, error: true, mensaje: null,temPruebaInit:null });
+                method.respuesta({ prueba: null, error: true, mensaje: null, temPruebaInit: null });
             }
         })
 
         console.log({ getPruebaTest: data });
 
     } catch (e) {
-        method.respuesta({ prueba: null, error: true, mensaje: null,temPruebaInit:null })
+        method.respuesta({ prueba: null, error: true, mensaje: null, temPruebaInit: null })
     }
     var method = {
         respuesta: (item) => {
@@ -1024,15 +1079,15 @@ function getPruebaTest(req, res) {
             })
         },
         setPruebaActivate: (item) => {
-     
+
             dataHoraPMethod(item.prueba.prueba).then((time) => {
 
                 let prueba = {
                     prueba: item.prueba.prueba.prueba,
                     tiempo: time
                 }
-                
-            
+
+
                 mgdClientesOtec.update({ "cliente.email": item.email, "identificador.key": item.identificador }, {
                     $set: {
                         "temPruebaInit": prueba
@@ -1040,14 +1095,14 @@ function getPruebaTest(req, res) {
                 }, (err, raw) => {
                     if (err == null) {
                         method.respuesta({ prueba: item.prueba, error: false, mensaje: null, temPruebaInit: prueba });
-                    }else{
+                    } else {
                         method.respuesta({ prueba: null, error: false, mensaje: null, temPruebaInit: null });
                     }
                 })
-           
+
             })
 
-         
+
         }
 
     }
