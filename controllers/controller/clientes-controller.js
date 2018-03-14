@@ -53,7 +53,7 @@ function updateEsquema(req, res) {
                 console.log({terminoCurso:TerminoCurso});
                 if(TerminoCurso=='Aprovar prueba termino curso'){
                     terminosCurso.APTC(cursoSelected);
-                }else if(TerminoCurso=='Visualizacion módulos'){
+                }else if(TerminoCurso=='Visualización módulos'){
                     terminosCurso.VM(cursoSelected);
                 }
 
