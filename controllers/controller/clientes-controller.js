@@ -27,8 +27,10 @@ var cliente = {
 
 function updateEsquema(req,res){
     let data = req.body.data;
-
-    console.log({updateEsquema:{data:data}});
+    let curso = data.p.curso;
+    let cliente = data.u.cliente;
+    let identificador = data.u.i;
+    console.log({updateEsquema:{data:data,curso:curso,cliente:cliente,identificador:identificador}});
 }
 
 function resultadoTerminoCurso(req,res){
