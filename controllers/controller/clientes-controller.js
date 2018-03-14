@@ -34,18 +34,22 @@ function getCurso(req,res){
 
     mgdClientesOtec.findOne({ "cliente.correoPago": cliente.correoPago }, (err, resCliente) => {
         if (resCliente != null) {
-        
+            console.log({resCliente:resCliente});
 
             let idxCurso = _.findIndex(resCliente.cursosSuscrito, (o) => {
                 return o.curso.data.cod_curso == curso.cod_curso;
             });
-            if (idxCurso > -1) {                
+            console.log({resCliente:resCliente});
+            if (idxCurso > -1) {       
+                console.log({idxCurso:idxCurso});         
                 method.respuesta({ curso: resCliente.cursosSuscrito[idxCurso] });
             }else{
+                console.log('no se encontro el curso');  
                 method.respuesta({ curso: null });
             }
 
         }else{
+            console.log('cliente no encontrado');  
             method.respuesta({ curso: null });
         }
     })
