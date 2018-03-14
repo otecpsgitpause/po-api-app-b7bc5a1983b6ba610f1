@@ -22,7 +22,8 @@ var app={
             terminarPrueba:clientes.terminarPrueba,
             resultadoPrueba:clientes.resultadoPrueba,
             resultadoTerminoCurso:clientes.resultadoTerminoCurso,
-            updateEsquema:clientes.updateEsquema
+            updateEsquema:clientes.updateEsquema,
+            getCurso:clientes.getCurso
         },
         complement:{
             hora:hora

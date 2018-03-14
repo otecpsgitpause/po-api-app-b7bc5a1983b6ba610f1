@@ -21,16 +21,55 @@ var cliente = {
         terminarPrueba: terminarPrueba,
         resultadoPrueba: resultadoPrueba,
         resultadoTerminoCurso: resultadoTerminoCurso,
-        updateEsquema: updateEsquema
+        updateEsquema: updateEsquema,
+        getCurso:getCurso
     }
 };
 
-function updateEsquema(req, res) {
+function getCurso(req,res){
     let data = req.body.data;
     let curso = data.p.curso;
     let cliente = data.u.cliente;
     let identificador = data.u.i;
-    console.log({ updateEsquema: { data: data, curso: curso, cliente: cliente, identificador: identificador } });
+
+    mgdClientesOtec.findOne({ "cliente.correoPago": cliente.correoPago }, (err, resCliente) => {
+        if (resCliente != null) {
+        
+
+            let idxCurso = _.findIndex(resCliente.cursosSuscrito, (o) => {
+                return o.curso.data.cod_curso == curso.cod_curso;
+            });
+            if (idxCurso > -1) {                
+                method.respuesta({ curso: resCliente.cursosSuscrito[idxCurso] });
+            }else{
+                method.respuesta({ curso: null });
+            }
+
+        }else{
+            method.respuesta({ curso: null });
+        }
+    })
+
+    var method = {
+        respuesta: (item) => {
+            let strgData = JSON.stringify({ data: { curso: item.curso } });
+            crypto.encode(strgData).then((enc) => {
+                res.json({
+                    d: enc,
+                    success: true
+                })
+            })
+        }
+    }
+
+}
+
+function updateEsquema(req, res) {
+    let data = req.body.data;
+    let esquema = data.p.esquema;
+    let cliente = data.u.cliente;
+    let identificador = data.u.i;
+    console.log({ updateEsquema: { data: data, esquema: esquema, cliente: cliente, identificador: identificador } });
     let opcionesTerminoCurso=['Aprovar prueba termino curso','Visualización módulos','Aprovar pruebas módulo',
         'Aprovar pruebas curso + módulos','Aprovar pruebas clases','Aprovar pruebas curso + módulos + clases'
     ]
@@ -38,7 +77,7 @@ function updateEsquema(req, res) {
         if (resCliente != null) {
             console.log({resCliente:resCliente});
             let idxCurso = _.findIndex(resCliente.cursosSuscrito, (o) => {
-                return o.curso.data.cod_curso == curso.cod_curso;
+                return o.curso.data.cod_curso == esquema.curso.cod_curso;
             });
 
             console.log({idxCurso:idxCurso});
@@ -46,16 +85,32 @@ function updateEsquema(req, res) {
 
             if (idxCurso > -1) {
 
-                let cursoSelected = resCliente.cursosSuscrito[idxCurso];
-
-                console.log({cursoSelected:cursoSelected});
+                resCliente.cursosSuscrito[idxCurso].esquema = esquema;
+                mgdClientesOtec.update({"cliente.correoPago": cliente.correoPago},{
+                    $set:{
+                        "cursosSuscrito":resCliente.cursosSuscrito
+                    }
+                },(err,raw)=>{
+                    if(err==null){
+                        mgdClientesOtec.findOne({ "cliente.correoPago": cliente.correoPago }, (err, resCliente) => {
+                            if (resCliente != null) {
+                                method.respuesta({ curso: resCliente.cursosSuscrito[idxCurso] }); 
+                            }else{
+                                method.respuesta({ curso: null });
+                            }
+                        })
+                    }else{
+                        method.respuesta({ curso: null });
+                    }
+                })
+              /*  console.log({cursoSelected:cursoSelected});
                 let TerminoCurso= curso.opcionTerminoCurso.name;
                 console.log({terminoCurso:TerminoCurso});
                 if(TerminoCurso=='Aprovar prueba termino curso'){
-                    terminosCurso.APTC(cursoSelected);
+                    terminosCurso.APTCReview(cursoSelected);
                 }else if(TerminoCurso=='Visualización módulos'){
-                    terminosCurso.VM(cursoSelected);
-                }
+                    terminosCurso.VMRewview(cursoSelected);
+                }*/
 
 
             } else {
@@ -69,16 +124,19 @@ function updateEsquema(req, res) {
     })
 
 
-    var terminosCurso={
-        APTC:(curso)=>{
+  /*  var terminosCurso={
+        APTCReview:(curso)=>{
 
         },
-        VM:(curso)=>{
+        VMRewview:(curso)=>{
             console.log({VM:{cursoSelected:curso}});
             let esquema = curso.esquema;
             console.log({VM:{esquema:esquema}});
+
+            esquema.modulos
+
         }
-    }
+    }*/
 
 
     var method = {
