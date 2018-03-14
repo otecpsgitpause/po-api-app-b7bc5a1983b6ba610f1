@@ -30,4 +30,6 @@ secureRouter.post('/0URyoLnSvLvX3SWDj7MwfSaLj5vjLaJKJrwyXkbePTvf',app.cliente.te
 secureRouter.post('/h7iOFiEbRjpxAtnl5TyQ91PgWiYXB9RitmUCKPMlqviz',app.cliente.resultadoPrueba);
 //9001b12
 secureRouter.post('/455DFGDFJkdsjfskDJFKGD8FDKJkjfdgjKDFGJ894DJF',app.cliente.resultadoTerminoCurso);
+//9001b13
+secureRouter.post('/70XNJgdaXDoIWD2YqAKTsiyh01KUbIwqCv5AZL5puL5Q',app.cliente.updateEsquema);
 module.exports =secureRouter; 

@@ -20,10 +20,16 @@ var cliente = {
         reviewPruebaContestada: reviewPruebaContestada,
         terminarPrueba:terminarPrueba,
         resultadoPrueba:resultadoPrueba,
-        resultadoTerminoCurso:resultadoTerminoCurso
-
+        resultadoTerminoCurso:resultadoTerminoCurso,
+        updateEsquema:updateEsquema
     }
 };
+
+function updateEsquema(req,res){
+    let data = req.body.data;
+
+    console.log({updateEsquema:{data:data}});
+}
 
 function resultadoTerminoCurso(req,res){
     try{
@@ -861,72 +867,7 @@ function informartiempo(req, res) {
         }
 
     }
-    /*
-    mgdClientesOtec.find({ "cliente.rut": user.cliente.rut, "identificador.key": identificador }, (err, resEstudiante) => {
-        if (resEstudiante.length != 0) {
-            /**
-             * Informar tiempo en el esquema
-             */
-    /*    console.log({ resEstudiante: resEstudiante[0].cursosSuscrito });
-        let indexCurso = _.findIndex(resEstudiante[0].cursosSuscrito, function (o) { return o.curso.data.cod_curso == curso; });
-        console.log({ indexCurso: indexCurso });
-        if (indexCurso != -1) {
 
-            if (time == 0) {
-                resEstudiante[0].cursosSuscrito[indexCurso].esquema.modulos[Number.parseInt(cnt.im)].clases[Number.parseInt(cnt.ic)].completado = true;
-                resEstudiante[0].cursosSuscrito[indexCurso].esquema.modulos[Number.parseInt(cnt.im)].clases[Number.parseInt(cnt.ic)].clase.horasClaseSegundos = time;
-            } else {
-                resEstudiante[0].cursosSuscrito[indexCurso].esquema.modulos[Number.parseInt(cnt.im)].clases[Number.parseInt(cnt.ic)].clase.horasClaseSegundos = time;
-            }
-
-
-            mgdClientesOtec.update({ "cliente.rut": user.cliente.rut, "identificador.key": identificador }, {
-                $set: {
-                    "cursosSuscrito": resEstudiante[0].cursosSuscrito
-                }
-            }, (err, rawTimeRes) => {
-                if (err == null) {
-                    console.log({ actualizacion: rawTimeRes });
-                    mgdClientesOtec.findOne({ "cliente.rut": user.cliente.rut, "identificador.key": identificador }, (err, resCursoUser) => {
-                        if (resCursoUser.length != 0) {
-                            let strgData = JSON.stringify({ data: { curso: resCursoUser.cursosSuscrito, u: true } });
-                            crypto.encode(strgData).then((enc) => {
-                                res.json({
-                                    d: enc,
-                                    success: true,
-                                    pet: true
-                                })
-                            })
-                        }
-
-                    })
-                } else {
-                    let strgData = JSON.stringify({ data: { curso: [], u: false } });
-                    crypto.encode(strgData).then((enc) => {
-                        res.json({
-                            d: enc,
-                            success: true,
-                            pet: true
-                        })
-                    })
-                }
-            })
-        } else {
-            let strgData = JSON.stringify({ data: { curso: [], u: false } });
-            crypto.encode(strgData).then((enc) => {
-                res.json({
-                    d: enc,
-                    success: true,
-                    pet: true
-                })
-            })
-        }
-
-
-    }
-});
-console.log({ user: user, time: time, clase: clase, identificadorApp: identificadorApp, identificador: identificador });
-*/
 }
 
 function dataHoraPMethod(prueba) {

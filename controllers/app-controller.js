@@ -21,8 +21,8 @@ var app={
             reviewPruebaContestada:clientes.reviewPruebaContestada,
             terminarPrueba:clientes.terminarPrueba,
             resultadoPrueba:clientes.resultadoPrueba,
-            resultadoTerminoCurso:clientes.resultadoTerminoCurso
-            
+            resultadoTerminoCurso:clientes.resultadoTerminoCurso,
+            updateEsquema:clientes.updateEsquema
         },
         complement:{
             hora:hora
