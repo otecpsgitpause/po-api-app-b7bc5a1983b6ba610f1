@@ -36,16 +36,21 @@ function updateEsquema(req, res) {
     ]
     mgdClientesOtec.findOne({ "cliente.correoPago": cliente.correoPago }, (err, resCliente) => {
         if (resCliente != null) {
+            console.log({resCliente:resCliente});
             let idxCurso = _.findIndex(resCliente.cursosSuscrito, (o) => {
                 return o.curso.data.cod_curso == curso.cod_curso;
             });
+
+            console.log({idxCurso:idxCurso});
+
 
             if (idxCurso > -1) {
 
                 let cursoSelected = resCliente.cursosSuscrito[idxCurso];
 
+                console.log({cursoSelected:cursoSelected});
                 let TerminoCurso= curso.opcionTerminoCurso.name;
-
+                console.log({terminoCurso:TerminoCurso});
                 if(TerminoCurso=='Aprovar prueba termino curso'){
                     terminosCurso.APTC(cursoSelected);
                 }else if(TerminoCurso=='Visualizacion módulos'){
@@ -55,9 +60,11 @@ function updateEsquema(req, res) {
 
             } else {
                 method.respuesta({ curso: null });
+                console.log('curso no encontrado');
             }
         } else {
             method.respuesta({ curso: null });
+            console.log('usuario no encontrado');
         }
     })
 
