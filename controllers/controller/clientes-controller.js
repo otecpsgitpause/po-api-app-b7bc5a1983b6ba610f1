@@ -74,7 +74,7 @@ function updateEsquema(req, res) {
     let cliente = data.u.cliente;
     let identificador = data.u.i;
     console.log({ updateEsquema: { data: data, esquema: esquema, cliente: cliente, identificador: identificador } });
-   /* let opcionesTerminoCurso=['Aprovar prueba termino curso','Visualización módulos','Aprovar pruebas módulo',
+    let opcionesTerminoCurso=['Aprovar prueba termino curso','Visualización módulos','Aprovar pruebas módulo',
         'Aprovar pruebas curso + módulos','Aprovar pruebas clases','Aprovar pruebas curso + módulos + clases'
     ]
     mgdClientesOtec.findOne({ "cliente.correoPago": cliente.correoPago }, (err, resCliente) => {
@@ -115,7 +115,7 @@ function updateEsquema(req, res) {
                 }else if(TerminoCurso=='Visualización módulos'){
                     terminosCurso.VMRewview(cursoSelected);
                 }*/
-/*
+
 
             } else {
                 method.respuesta({ curso: null });
@@ -125,7 +125,7 @@ function updateEsquema(req, res) {
             method.respuesta({ curso: null });
             console.log('usuario no encontrado');
         }
-    })*/
+    })
 
 
   /*  var terminosCurso={
