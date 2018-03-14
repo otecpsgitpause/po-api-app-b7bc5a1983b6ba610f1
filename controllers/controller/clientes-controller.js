@@ -75,6 +75,8 @@ function updateEsquema(req, res) {
         },
         VM:(curso)=>{
             console.log({VM:{cursoSelected:curso}});
+            let esquema = curso.esquema;
+            console.log({VM:{esquema:esquema}});
         }
     }
 
