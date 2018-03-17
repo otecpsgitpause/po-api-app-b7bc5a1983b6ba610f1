@@ -89,7 +89,7 @@ function updateEsquema(req, res) {
 
             if (idxCurso > -1) {
 
-                resCliente.cursosSuscrito[idxCurso].esquema = esquema;
+                resCliente.cursosSuscrito[idxCurso].esquema = esquema.curso;
                 mgdClientesOtec.update({"cliente.correoPago": cliente.correoPago},{
                     $set:{
                         "cursosSuscrito":resCliente.cursosSuscrito
