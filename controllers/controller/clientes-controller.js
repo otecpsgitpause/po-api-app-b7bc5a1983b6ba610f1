@@ -81,7 +81,7 @@ function updateEsquema(req, res) {
         if (resCliente != null) {
             console.log({resCliente:resCliente});
             let idxCurso = _.findIndex(resCliente.cursosSuscrito, (o) => {
-                return o.curso.data.cod_curso == esquema.curso.cod_curso;
+                return o.curso.data.cod_curso == esquema.curso.curso.cod_curso;
             });
 
             console.log({idxCurso:idxCurso});
