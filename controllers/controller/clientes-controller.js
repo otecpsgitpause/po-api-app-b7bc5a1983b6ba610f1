@@ -1048,8 +1048,9 @@ function fechaHoy() {
 }
 
 function fechaHoyNoPromise() {
-    let jData;
+    let jData = null;
     let server = ['cl.pool.ntp.org', 'south-america.pool.ntp.org', 'ntp.shoa.cl'];
+
     ntpClient.getNetworkTime(server[2], 123, (err, data) => {
         jData = {
             fechaHoy: moment(data).format('MM-DD-YYYY'),
@@ -1196,7 +1197,7 @@ function informarInicioPrueba(req, res) {
 
         var method = {
             respuesta: (item) => {
-                let strgData = JSON.stringify({ data: { informar:item.informar } });
+                let strgData = JSON.stringify({ data: { informar: item.informar } });
                 crypto.encode(strgData).then((enc) => {
                     res.json({
                         d: enc,
@@ -1211,27 +1212,35 @@ function informarInicioPrueba(req, res) {
 
         mgdClientesOtec.findOne({ "cliente.rut": cliente.rut }, (err, resCliente) => {
             if (err == null && resCliente != null) {
-                if (resCliente.temPruebaInit == null) {
-                    mgdClientesOtec.update({ "cliente.rut": cliente.rut }, {
-                        $set: {
-                            "temPruebaInit": prueba
-                        }
-                    }, (err, raw) => {
-                        if (err == null) {
-                            method.respuesta({informar:{state:true,mensaje:'new informada'}});
-                        } else {
-                            method.respuesta({informar:{state:false,mensaje:'error al informar'}});
-                        }
-                    })
-                } else {
-                    let pruebaInit = resCliente.temPruebaInit.prueba.prueba.prueba;
-                    if (pruebaInit.codPrueba == prueba.prueba.prueba.prueba.codPrueba) {
-                        method.respuesta({informar:{state:true,mensaje:'informada'}});
+                let time= fechaHoyNoPromise();
+                if (time != null) {
+                    if (resCliente.temPruebaInit == null) {
+                        prueba.tiempo=time;
+                        mgdClientesOtec.update({ "cliente.rut": cliente.rut }, {
+                            $set: {
+                                "temPruebaInit": prueba
+                            }
+                        }, (err, raw) => {
+                            if (err == null) {
+                                method.respuesta({ informar: { state: true, mensaje: 'new informada' } });
+                            } else {
+                                method.respuesta({ informar: { state: false, mensaje: 'error al informar' } });
+                            }
+                        })
                     } else {
-                        method.respuesta({informar:{state:true,mensaje:'no informada actualizando'}});
-                    }
+                        let pruebaInit = resCliente.temPruebaInit.prueba.prueba.prueba;
+                        if (pruebaInit.codPrueba == prueba.prueba.prueba.prueba.codPrueba) {
+                            method.respuesta({ informar: { state: true, mensaje: 'informada' } });
+                        } else {
+                            method.respuesta({ informar: { state: true, mensaje: 'no informada actualizando' } });
+                        }
 
+                    }
+                } else {
+                    method.respuesta({ informar: { state: false, mensaje: 'error al informar' } });
                 }
+
+
 
             }
 
