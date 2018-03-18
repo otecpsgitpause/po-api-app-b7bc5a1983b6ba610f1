@@ -1195,7 +1195,7 @@ function informarInicioPrueba(req, res) {
 
         mgdClientesOtec.findOne({ "cliente.rut": cliente.rut }, (err, resCliente) => {
             if (err == null && resCliente!=null) {
-                
+                 
             }
              
         })
