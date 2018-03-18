@@ -22,11 +22,11 @@ var cliente = {
         resultadoPrueba: resultadoPrueba,
         resultadoTerminoCurso: resultadoTerminoCurso,
         updateEsquema: updateEsquema,
-        getCurso:getCurso
+        getCurso: getCurso
     }
 };
 
-function getCurso(req,res){
+function getCurso(req, res) {
     let data = req.body.data;
     let curso = data.p.curso;
     let cliente = data.u.cliente;
@@ -34,22 +34,22 @@ function getCurso(req,res){
 
     mgdClientesOtec.findOne({ "cliente.correoPago": cliente.correoPago }, (err, resCliente) => {
         if (resCliente != null) {
-            console.log({resCliente:resCliente});
+            console.log({ resCliente: resCliente });
 
             let idxCurso = _.findIndex(resCliente.cursosSuscrito, (o) => {
                 return o.curso.data.cod_curso == curso.cod_curso;
             });
-            console.log({resCliente:resCliente});
-            if (idxCurso > -1) {       
-                console.log({idxCurso:idxCurso});         
+            console.log({ resCliente: resCliente });
+            if (idxCurso > -1) {
+                console.log({ idxCurso: idxCurso });
                 method.respuesta({ curso: resCliente.cursosSuscrito[idxCurso] });
-            }else{
-                console.log('no se encontro el curso');  
+            } else {
+                console.log('no se encontro el curso');
                 method.respuesta({ curso: null });
             }
 
-        }else{
-            console.log('cliente no encontrado');  
+        } else {
+            console.log('cliente no encontrado');
             method.respuesta({ curso: null });
         }
     })
@@ -74,47 +74,47 @@ function updateEsquema(req, res) {
     let cliente = data.u.cliente;
     let identificador = data.u.i;
     console.log({ updateEsquema: { data: data, esquema: esquema, cliente: cliente, identificador: identificador } });
-    let opcionesTerminoCurso=['Aprovar prueba termino curso','Visualización módulos','Aprovar pruebas módulo',
-        'Aprovar pruebas curso + módulos','Aprovar pruebas clases','Aprovar pruebas curso + módulos + clases'
+    let opcionesTerminoCurso = ['Aprovar prueba termino curso', 'Visualización módulos', 'Aprovar pruebas módulo',
+        'Aprovar pruebas curso + módulos', 'Aprovar pruebas clases', 'Aprovar pruebas curso + módulos + clases'
     ]
     mgdClientesOtec.findOne({ "cliente.correoPago": cliente.correoPago }, (err, resCliente) => {
         if (resCliente != null) {
-            console.log({resCliente:resCliente});
+            console.log({ resCliente: resCliente });
             let idxCurso = _.findIndex(resCliente.cursosSuscrito, (o) => {
                 return o.curso.data.cod_curso == esquema.curso.curso.cod_curso;
             });
 
-            console.log({idxCurso:idxCurso});
+            console.log({ idxCurso: idxCurso });
 
 
             if (idxCurso > -1) {
 
                 resCliente.cursosSuscrito[idxCurso].esquema = esquema.curso;
-                mgdClientesOtec.update({"cliente.correoPago": cliente.correoPago},{
-                    $set:{
-                        "cursosSuscrito":resCliente.cursosSuscrito
+                mgdClientesOtec.update({ "cliente.correoPago": cliente.correoPago }, {
+                    $set: {
+                        "cursosSuscrito": resCliente.cursosSuscrito
                     }
-                },(err,raw)=>{
-                    if(err==null){
+                }, (err, raw) => {
+                    if (err == null) {
                         mgdClientesOtec.findOne({ "cliente.correoPago": cliente.correoPago }, (err, resCliente) => {
                             if (resCliente != null) {
-                                method.respuesta({ curso: resCliente.cursosSuscrito[idxCurso] }); 
-                            }else{
+                                method.respuesta({ curso: resCliente.cursosSuscrito[idxCurso] });
+                            } else {
                                 method.respuesta({ curso: null });
                             }
                         })
-                    }else{
+                    } else {
                         method.respuesta({ curso: null });
                     }
                 })
-              /*  console.log({cursoSelected:cursoSelected});
-                let TerminoCurso= curso.opcionTerminoCurso.name;
-                console.log({terminoCurso:TerminoCurso});
-                if(TerminoCurso=='Aprovar prueba termino curso'){
-                    terminosCurso.APTCReview(cursoSelected);
-                }else if(TerminoCurso=='Visualización módulos'){
-                    terminosCurso.VMRewview(cursoSelected);
-                }*/
+                /*  console.log({cursoSelected:cursoSelected});
+                  let TerminoCurso= curso.opcionTerminoCurso.name;
+                  console.log({terminoCurso:TerminoCurso});
+                  if(TerminoCurso=='Aprovar prueba termino curso'){
+                      terminosCurso.APTCReview(cursoSelected);
+                  }else if(TerminoCurso=='Visualización módulos'){
+                      terminosCurso.VMRewview(cursoSelected);
+                  }*/
 
 
             } else {
@@ -128,19 +128,19 @@ function updateEsquema(req, res) {
     })
 
 
-  /*  var terminosCurso={
-        APTCReview:(curso)=>{
-
-        },
-        VMRewview:(curso)=>{
-            console.log({VM:{cursoSelected:curso}});
-            let esquema = curso.esquema;
-            console.log({VM:{esquema:esquema}});
-
-            esquema.modulos
-
-        }
-    }*/
+    /*  var terminosCurso={
+          APTCReview:(curso)=>{
+  
+          },
+          VMRewview:(curso)=>{
+              console.log({VM:{cursoSelected:curso}});
+              let esquema = curso.esquema;
+              console.log({VM:{esquema:esquema}});
+  
+              esquema.modulos
+  
+          }
+      }*/
 
 
     var method = {
@@ -1193,11 +1193,48 @@ function informarInicioPrueba(req, res) {
         console.log({ dataInformarInicioPrueba: data });
         //persistencie
 
-        mgdClientesOtec.findOne({ "cliente.rut": cliente.rut }, (err, resCliente) => {
-            if (err == null && resCliente!=null) {
-                 
+
+        var method = {
+            respuesta: (item) => {
+                let strgData = JSON.stringify({ data: { informar:item.informar } });
+                crypto.encode(strgData).then((enc) => {
+                    res.json({
+                        d: enc,
+                        success: true,
+                        pet: true
+                    })
+                })
             }
-             
+        }
+
+
+
+        mgdClientesOtec.findOne({ "cliente.rut": cliente.rut }, (err, resCliente) => {
+            if (err == null && resCliente != null) {
+                if (resCliente.temPruebaInit == null) {
+                    mgdClientesOtec.update({ "cliente.rut": cliente.rut }, {
+                        $set: {
+                            "temPruebaInit": prueba
+                        }
+                    }, (err, raw) => {
+                        if (err == null) {
+                            method.respuesta({informar:{state:true,mensaje:'new informada'}});
+                        } else {
+                            method.respuesta({informar:{state:false,mensaje:'error al informar'}});
+                        }
+                    })
+                } else {
+                    let pruebaInit = resCliente.temPruebaInit.prueba.prueba.prueba;
+                    if (pruebaInit.codPrueba == prueba.prueba.prueba.prueba.codPrueba) {
+                        method.respuesta({informar:{state:true,mensaje:'informada'}});
+                    } else {
+                        method.respuesta({informar:{state:true,mensaje:'no informada actualizando'}});
+                    }
+
+                }
+
+            }
+
         })
 
 
