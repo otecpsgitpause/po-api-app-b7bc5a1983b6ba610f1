@@ -1193,69 +1193,11 @@ function informarInicioPrueba(req, res) {
         console.log({ dataInformarInicioPrueba: data });
         //persistencie
 
-        mgdClientesOtec.find({ "cliente.rut": cliente.rut }, (errCli, rescli) => {
-            if (errCli == null && rescli.length > 0) {
-                let indexObject = Object.keys(rescli[0]).indexOf('temPruebaInit');
-                if (indexObject != -1) {
-                    if (rescli[0].temPruebaInit == null) {
-                        mgdClientesOtec.update({ "cliente.rut": cliente.rut }, {
-                            $set: {
-                                "temPruebaInit": data
-                            }
-                        }, (err, rawCliente) => {
-                            if (err == null) {
-                                let strgData = JSON.stringify({ data: { infP: true } });
-                                crypto.encode(strgData).then((enc) => {
-                                    res.json({
-                                        d: enc,
-                                        success: true,
-                                        pet: true
-                                    })
-                                })
-                            } else {
-                                let strgData = JSON.stringify({ data: { infP: false } });
-                                crypto.encode(strgData).then((enc) => {
-                                    res.json({
-                                        d: enc,
-                                        success: true,
-                                        pet: true
-                                    })
-                                })
-                            }
-                        })
-
-
-
-
-                    }
-                } else {
-                    mgdClientesOtec.update({ "cliente.rut": cliente.rut }, {
-                        $set: {
-                            "temPruebaInit": data
-                        }
-                    }, (err, rawCliente) => {
-                        if (err == null) {
-                            let strgData = JSON.stringify({ data: { infP: true } });
-                            crypto.encode(strgData).then((enc) => {
-                                res.json({
-                                    d: enc,
-                                    success: true,
-                                    pet: true
-                                })
-                            })
-                        } else {
-                            let strgData = JSON.stringify({ data: { infP: false } });
-                            crypto.encode(strgData).then((enc) => {
-                                res.json({
-                                    d: enc,
-                                    success: true,
-                                    pet: true
-                                })
-                            })
-                        }
-                    })
-                }
+        mgdClientesOtec.findOne({ "cliente.rut": cliente.rut }, (err, resCliente) => {
+            if (err == null && resCliente!=null) {
+                
             }
+             
         })
 
 
