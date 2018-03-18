@@ -1222,22 +1222,22 @@ function informarInicioPrueba(req, res) {
                             }
                         }, (err, raw) => {
                             if (err == null) {
-                                method.respuesta({ informar: { state: true, mensaje: 'new informada' } });
+                                method.respuesta({ informar: { state: true, mensaje: 'new informada',prueba:prueba } });
                             } else {
-                                method.respuesta({ informar: { state: false, mensaje: 'error al informar' } });
+                                method.respuesta({ informar: { state: false, mensaje: 'error al informar',prueba:prueba } });
                             }
                         })
                     } else {
                         let pruebaInit = resCliente.temPruebaInit.prueba.prueba.prueba;
                         if (pruebaInit.codPrueba == prueba.prueba.prueba.prueba.codPrueba) {
-                            method.respuesta({ informar: { state: true, mensaje: 'informada' } });
+                            method.respuesta({ informar: { state: true, mensaje: 'informada',prueba:prueba } });
                         } else {
-                            method.respuesta({ informar: { state: true, mensaje: 'no informada actualizando' } });
+                            method.respuesta({ informar: { state: true, mensaje: 'no informada actualizando',prueba:prueba } });
                         }
 
                     }
                 } else {
-                    method.respuesta({ informar: { state: false, mensaje: 'error al informar' } });
+                    method.respuesta({ informar: { state: false, mensaje: 'error al informar',prueba:prueba } });
                 }
 
 
