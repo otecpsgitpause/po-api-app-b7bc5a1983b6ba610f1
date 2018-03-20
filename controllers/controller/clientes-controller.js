@@ -1234,6 +1234,7 @@ function informarInicioPrueba(req, res) {
                             let pruebaInit = resCliente.temPruebaInit.prueba.prueba.prueba;
                             if (pruebaInit.codPrueba == prueba.prueba.prueba.prueba.codPrueba) {
                                 prueba.tiempo = time;
+                                prueba.initTiempo=resCliente.temPruebaInit.initTiempo;
                                 method.respuesta({ informar: { state: true, mensaje: 'informada', prueba: prueba } });
                             } else {
                                 prueba.initTiempo = time;
