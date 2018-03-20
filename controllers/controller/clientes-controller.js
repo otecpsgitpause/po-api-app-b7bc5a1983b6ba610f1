@@ -1036,9 +1036,9 @@ function fechaHoy() {
         ntpClient.getNetworkTime(server[1], 123, (err, data) => {
             console.log({getNetworkTime:{data:data}});
             jData = {
-                fechaHoy: moment(data).format('MM-DD-YYYY'),
-                horahoy: moment(data).format('HH:mm:ss').split(':'),
-                horahoyses: moment(data).format('HH:mm:ss')
+                fechaHoy: moment(data).utc().format('MM-DD-YYYY'),
+                horahoy: moment(data).utc().add('hours',-3).format('HH:mm:ss').split(':'),
+                horahoyses: moment(data).utc().add('hours',-3).format('HH:mm:ss')
 
             }
             resolve(jData);
