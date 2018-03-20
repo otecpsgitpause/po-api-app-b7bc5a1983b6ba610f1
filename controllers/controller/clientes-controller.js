@@ -1030,7 +1030,7 @@ function dataHoraPMethod(prueba) {
 
 function fechaHoy() {
     return new Promise((resolve, reject) => {
-        let jData;
+        let jData=null;
         let server = ['cl.pool.ntp.org', 'south-america.pool.ntp.org', 'ntp.shoa.cl'];
 
         ntpClient.getNetworkTime(server[2], 123, (err, data) => {
@@ -1212,7 +1212,9 @@ function informarInicioPrueba(req, res) {
 
         mgdClientesOtec.findOne({ "cliente.rut": cliente.rut }, (err, resCliente) => {
             if (err == null && resCliente != null) {
-                let time= fechaHoyNoPromise();
+                fechaHoy().then((time)=>{
+                    
+               
                 if (time != null) {
                     if (resCliente.temPruebaInit == null) {
                         prueba.tiempo=time;
@@ -1240,7 +1242,7 @@ function informarInicioPrueba(req, res) {
                     method.respuesta({ informar: { state: false, mensaje: 'error al informar',prueba:prueba } });
                 }
 
-
+            })
 
             }
 
