@@ -1030,7 +1030,7 @@ function dataHoraPMethod(prueba) {
 
 function fechaHoy() {
     return new Promise((resolve, reject) => {
-        let jData=null;
+        let jData = null;
         let server = ['cl.pool.ntp.org', 'south-america.pool.ntp.org', 'ntp.shoa.cl'];
 
         ntpClient.getNetworkTime(server[2], 123, (err, data) => {
@@ -1212,37 +1212,52 @@ function informarInicioPrueba(req, res) {
 
         mgdClientesOtec.findOne({ "cliente.rut": cliente.rut }, (err, resCliente) => {
             if (err == null && resCliente != null) {
-                fechaHoy().then((time)=>{
-                    
-               
-                if (time != null) {
-                    if (resCliente.temPruebaInit == null) {
-                        prueba.tiempo=time;
-                        mgdClientesOtec.update({ "cliente.rut": cliente.rut }, {
-                            $set: {
-                                "temPruebaInit": prueba
-                            }
-                        }, (err, raw) => {
-                            if (err == null) {
-                                method.respuesta({ informar: { state: true, mensaje: 'new informada',prueba:prueba } });
-                            } else {
-                                method.respuesta({ informar: { state: false, mensaje: 'error al informar',prueba:prueba } });
-                            }
-                        })
-                    } else {
-                        let pruebaInit = resCliente.temPruebaInit.prueba.prueba.prueba;
-                        if (pruebaInit.codPrueba == prueba.prueba.prueba.prueba.codPrueba) {
-                            method.respuesta({ informar: { state: true, mensaje: 'informada',prueba:prueba } });
+                fechaHoy().then((time) => {
+
+
+                    if (time != null) {
+                        if (resCliente.temPruebaInit == null) {
+                            prueba.initTiempo = time;
+                            prueba.tiempo = time;
+                            mgdClientesOtec.update({ "cliente.rut": cliente.rut }, {
+                                $set: {
+                                    "temPruebaInit": prueba
+                                }
+                            }, (err, raw) => {
+                                if (err == null) {
+                                    method.respuesta({ informar: { state: true, mensaje: 'new informada', prueba: prueba } });
+                                } else {
+                                    method.respuesta({ informar: { state: false, mensaje: 'error al informar', prueba: prueba } });
+                                }
+                            })
                         } else {
-                            method.respuesta({ informar: { state: true, mensaje: 'no informada actualizando',prueba:prueba } });
+                            let pruebaInit = resCliente.temPruebaInit.prueba.prueba.prueba;
+                            if (pruebaInit.codPrueba == prueba.prueba.prueba.prueba.codPrueba) {
+                                prueba.tiempo = time;
+                                method.respuesta({ informar: { state: true, mensaje: 'informada', prueba: prueba } });
+                            } else {
+                                prueba.initTiempo = time;
+                                prueba.tiempo = time;
+                                mgdClientesOtec.update({ "cliente.rut": cliente.rut }, {
+                                    $set: {
+                                        "temPruebaInit": prueba
+                                    }
+                                }, (err, raw) => {
+                                    if (err == null) {
+                                        method.respuesta({ informar: { state: true, mensaje: 'actualizado', prueba: prueba } });
+                                    } else {
+                                        method.respuesta({ informar: { state: false, mensaje: 'error al informar', prueba: prueba } });
+                                    }
+                                })
+
+                            }
+
                         }
-
+                    } else {
+                        method.respuesta({ informar: { state: false, mensaje: 'error al informar', prueba: prueba } });
                     }
-                } else {
-                    method.respuesta({ informar: { state: false, mensaje: 'error al informar',prueba:prueba } });
-                }
 
-            })
+                })
 
             }
 
