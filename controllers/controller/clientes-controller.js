@@ -48,7 +48,7 @@ function responderPregunta(req,res){
     }
 
 
-    mgdClientesOtec.update({ "cliente.email": cliente.cliente.email, "identificador.key": identificador },{
+    mgdClientesOtec.update({ "cliente.email": cliente.email, "identificador.key": identificador },{
         $set:{
             "resultadoPrueba":resultadoPrueba,
             "respuestas":respuestas
