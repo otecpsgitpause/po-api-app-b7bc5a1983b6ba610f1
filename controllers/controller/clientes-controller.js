@@ -608,9 +608,10 @@ function terminarPrueba(req, res) {
     try {
         let data = req.body.data;
         let prueba= data.p.prueba;
-        let u = data.u;
+        let cliente = data.u.cliente;
+        let identificador= data.u.i;
 
-        console.log({terminarPrueba:{prueba:prueba,u:u}});
+        console.log({terminarPrueba:{prueba:prueba,cliente:cliente,identificador:identificador}});
 
         /*        
         let respuestas = data.p.respuestas;
