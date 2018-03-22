@@ -32,6 +32,34 @@ function responderPregunta(req,res){
     let cliente = data.u.cliente;
     let identificador = data.u.i;
     let respuestaItem=data.p;
+    let resultadoPrueba=respuestaItem.resultadoPrueba;
+    let respuestas= respuestaItem.respuestas;
+
+    var method = {
+        respuesta: (item) => {
+            let strgData = JSON.stringify({ data: { respuesta:item.respuesta } });
+            crypto.encode(strgData).then((enc) => {
+                res.json({
+                    d: enc,
+                    success: true
+                })
+            })
+        }
+    }
+
+
+    mgdClientesOtec.update({ "cliente.email": cliente.cliente.email, "identificador.key": identificador },{
+        $set:{
+            "resultadoPrueba":resultadoPrueba,
+            "respuestas":respuestas
+        }
+    },(err,raw)=>{
+        if(err==null){
+            method.respuesta({respuesta:{update:true}});
+        }else{
+            method.respuesta({respuesta:{update:false}});
+        }
+    })
     console.log({responderPregunta:{data:data,respuestaItem:respuestaItem}});
 }
 
