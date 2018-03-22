@@ -607,6 +607,10 @@ function terminarPrueba(req, res) {
 
     try {
         let data = req.body.data;
+
+        console.log({terminarPrueba:{data:data}});
+
+        /*        
         let respuestas = data.p.respuestas;
         let cliente = data.p.prueba.cliente;
         let identificador = data.p.prueba.i;
@@ -804,7 +808,7 @@ function terminarPrueba(req, res) {
 
             }
         })
-
+*/
 
 
     } catch (e) {
