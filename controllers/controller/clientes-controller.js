@@ -1037,8 +1037,8 @@ function fechaHoy() {
             console.log({getNetworkTime:{data:data}});
             jData = {
                 fechaHoy: moment(data).utc().format('MM-DD-YYYY'),
-                horahoy:moment.utc(moment(data).add('hours',-3).format('HH:mm:ss')).format('HH:mm:ss').split(':'),
-                horahoyses:moment.utc(moment(data).add('hours',-3).format('HH:mm:ss')).format('HH:mm:ss')
+                horahoy: moment(data).utc().add('hours',-3).format('HH:mm:ss').split(':'),
+                horahoyses: moment(data).utc().add('hours',-3).format('HH:mm:ss')
 
             }
             resolve(jData);
