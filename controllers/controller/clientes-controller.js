@@ -27,6 +27,11 @@ var cliente = {
     }
 };
 
+function responderPregunta(req,res){
+    let data = req.body.data;
+    console.log({responderPregunta:{data:data}});
+}
+
 function getCurso(req, res) {
     let data = req.body.data;
     let curso = data.p.curso;
