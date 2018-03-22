@@ -663,6 +663,8 @@ function terminarPrueba(req, res) {
                 mgdClientesOtec.update({"cliente.email": cliente.email, "identificador.key": identificador},{
                     $set:{
                         "temPruebaInit":null,
+                        "resultadoPrueba":null,
+                        "respuestas":null,
                         "cursosSuscrito":item.cursosSuscrito
                     }
                 },(err,raw)=>{
@@ -686,10 +688,12 @@ function terminarPrueba(req, res) {
                     prueba: prueba.prueba.prueba.prueba,
                     type: prueba.prueba.type,
                     idxs: prueba.prueba.idx,
-                    respuestas: null,
+                    respuestas: resCliente.respuestas,
                     preguntas: prueba.prueba.prueba.preguntasAlternativas,
                     initTiempo: resCliente.temPruebaInit.initTiempo,
-                    tiempoRespuesta:resCliente.temPruebaInit.tiempo
+                    tiempoRespuesta:resCliente.temPruebaInit.tiempo,
+                    resultadoPrueba:resCliente.resultadoPrueba,
+                
                 }
 
                 let idxCurso = _.findIndex(resCliente.cursosSuscrito,(o)=>{
@@ -1367,7 +1371,9 @@ function informarInicioPrueba(req, res) {
                                 prueba.tiempo = time;
                                 mgdClientesOtec.update({ "cliente.rut": cliente.rut }, {
                                     $set: {
-                                        "temPruebaInit": prueba
+                                        "temPruebaInit": prueba,
+                                        "resultadoPrueba":null,
+                                        "respuestas":null
                                     }
                                 }, (err, raw) => {
                                     if (err == null) {
@@ -1387,7 +1393,9 @@ function informarInicioPrueba(req, res) {
                                     prueba.tiempo = time;
                                     mgdClientesOtec.update({ "cliente.rut": cliente.rut }, {
                                         $set: {
-                                            "temPruebaInit": prueba
+                                            "temPruebaInit": prueba,
+                                            "resultadoPrueba":null,
+                                            "respuestas":null
                                         }
                                     }, (err, raw) => {
                                         if (err == null) {
