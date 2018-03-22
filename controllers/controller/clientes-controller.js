@@ -1217,27 +1217,23 @@ function informarInicioPrueba(req, res) {
 
 
                     if (time != null) {
-                        if (resCliente.temPruebaInit == null) {
-                            prueba.initTiempo = time;
-                            prueba.tiempo = time;
-                            mgdClientesOtec.update({ "cliente.rut": cliente.rut }, {
-                                $set: {
-                                    "temPruebaInit": prueba
-                                }
-                            }, (err, raw) => {
-                                if (err == null) {
-                                    method.respuesta({ informar: { state: true, mensaje: 'new informada', prueba: prueba } });
-                                } else {
-                                    method.respuesta({ informar: { state: false, mensaje: 'error al informar', prueba: prueba } });
-                                }
-                            })
-                        } else {
-                            let pruebaInit = resCliente.temPruebaInit.prueba.prueba.prueba;
-                            if (pruebaInit.codPrueba == prueba.prueba.prueba.prueba.codPrueba) {
-                                prueba.tiempo = time;
-                                prueba.initTiempo=resCliente.temPruebaInit.initTiempo;
-                                method.respuesta({ informar: { state: true, mensaje: 'informada', prueba: prueba } });
-                            } else {
+/**
+ * 
+ * fechaHoy: moment(data).utc().format('MM-DD-YYYY'),
+                horahoy: moment(data).utc().add('hours',-3).format('HH:mm:ss').split(':'),
+                horahoyses: moment(data).utc().add('hours',-3).format('HH:mm:ss')
+ * 
+ */
+                        if(time.fechaHoy!='Invalid date'
+                          && time.fechaHoy!=undefined
+                          && time.fechaHoy!=null 
+                          && time.horahoy!='Invalid date'
+                          && time.horahoy!=undefined 
+                          && time.horahoy!=null
+                          && time.horahoyses!='Invalid date' 
+                          && time.horahoyses!=undefined 
+                          && time.horahoyses!=null){
+                            if (resCliente.temPruebaInit == null) {
                                 prueba.initTiempo = time;
                                 prueba.tiempo = time;
                                 mgdClientesOtec.update({ "cliente.rut": cliente.rut }, {
@@ -1246,15 +1242,40 @@ function informarInicioPrueba(req, res) {
                                     }
                                 }, (err, raw) => {
                                     if (err == null) {
-                                        method.respuesta({ informar: { state: true, mensaje: 'actualizado', prueba: prueba } });
+                                        method.respuesta({ informar: { state: true, mensaje: 'new informada', prueba: prueba } });
                                     } else {
                                         method.respuesta({ informar: { state: false, mensaje: 'error al informar', prueba: prueba } });
                                     }
                                 })
-
+                            } else {
+                                let pruebaInit = resCliente.temPruebaInit.prueba.prueba.prueba;
+                                if (pruebaInit.codPrueba == prueba.prueba.prueba.prueba.codPrueba) {
+                                    prueba.tiempo = time;
+                                    prueba.initTiempo=resCliente.temPruebaInit.initTiempo;
+                                    method.respuesta({ informar: { state: true, mensaje: 'informada', prueba: prueba } });
+                                } else {
+                                    prueba.initTiempo = time;
+                                    prueba.tiempo = time;
+                                    mgdClientesOtec.update({ "cliente.rut": cliente.rut }, {
+                                        $set: {
+                                            "temPruebaInit": prueba
+                                        }
+                                    }, (err, raw) => {
+                                        if (err == null) {
+                                            method.respuesta({ informar: { state: true, mensaje: 'actualizado', prueba: prueba } });
+                                        } else {
+                                            method.respuesta({ informar: { state: false, mensaje: 'error al informar', prueba: prueba } });
+                                        }
+                                    })
+    
+                                }
+    
                             }
+                          }else{
+                            method.respuesta({ informar: { state: false, mensaje: 'error al informar tiempo invalid o undefined o null', prueba: prueba } });
+                          }
 
-                        }
+                        
                     } else {
                         method.respuesta({ informar: { state: false, mensaje: 'error al informar', prueba: prueba } });
                     }
