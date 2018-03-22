@@ -24,7 +24,8 @@ var clientesOtec = Schema({
 
     }],
     temPruebaInit:Object,
-    respuestas:Object
+    respuestas:Object,
+    resultadoPrueba:Object
 
 
 

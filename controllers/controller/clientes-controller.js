@@ -29,7 +29,10 @@ var cliente = {
 
 function responderPregunta(req,res){
     let data = req.body.data;
-    console.log({responderPregunta:{data:data}});
+    let cliente = data.u.cliente;
+    let identificador = data.u.i;
+    let respuestaItem=data.p;
+    console.log({responderPregunta:{data:data,respuestaItem:respuestaItem}});
 }
 
 function getCurso(req, res) {
