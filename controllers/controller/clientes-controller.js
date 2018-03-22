@@ -607,8 +607,10 @@ function terminarPrueba(req, res) {
 
     try {
         let data = req.body.data;
+        let prueba= data.p.prueba;
+        let u = data.u;
 
-        console.log({terminarPrueba:{data:data}});
+        console.log({terminarPrueba:{prueba:prueba,u:u}});
 
         /*        
         let respuestas = data.p.respuestas;
