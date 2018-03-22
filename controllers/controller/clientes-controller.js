@@ -34,7 +34,7 @@ function responderPregunta(req,res){
     let respuestaItem=data.p;
     let resultadoPrueba=respuestaItem.resultadoPrueba;
     let respuestas= respuestaItem.respuestas;
-
+    console.log({cliente:cliente,indentificador:identificador});
     var method = {
         respuesta: (item) => {
             let strgData = JSON.stringify({ data: { respuesta:item.respuesta } });
