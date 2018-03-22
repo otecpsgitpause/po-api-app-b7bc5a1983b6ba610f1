@@ -607,12 +607,97 @@ function terminarPrueba(req, res) {
 
     try {
         let data = req.body.data;
-        let prueba= data.p.prueba;
+        let prueba = data.p.prueba;
         let cliente = data.u.cliente;
-        let identificador= data.u.i;
+        let identificador = data.u.i;
+        let cod_curso=prueba.prueba.prueba.prueba.cod_curso;
+        let codPrueba= prueba.prueba.prueba.prueba.codPrueba;
+        var methods = {
+            respuesta: (item) => {
+                let strgData = JSON.stringify({ data: { respuesta: item.respuesta } });
+                crypto.encode(strgData).then((enc) => {
+                    res.json({
+                        d: enc,
+                        success: true
+                    })
+                })
+            },
+            updateEsquemaUsuario:(item)=>{
+                mgdClientesOtec.update({"cliente.email": cliente.email, "identificador.key": identificador},{
+                    $set:{
+                        "temPruebaInit":null,
+                        "cursosSuscrito":item.cursosSuscrito
+                    }
+                },(err,raw)=>{
+                    if(err==null){
+                        methods.respuesta({respuesta:{curso:item.curso,state:true,mensaje:null}});
+                    }else{
+                        methods.respuesta({respuesta:{curso:item.curso,state:false,mensaje:'No se pudo actualiza el esquema'}});
+                    }
+                    
+                })
+            }
+        }
 
-        console.log({terminarPrueba:{prueba:prueba,cliente:cliente,identificador:identificador}});
 
+
+        console.log({ terminarPrueba: { prueba: prueba, cliente: cliente, identificador: identificador } });
+        mgdClientesOtec.findOne({ "cliente.email": cliente.email, "identificador.key": identificador }, (err, resCliente) => {
+            if (resCliente != null) {
+                let registroPrueba = {
+                    item: null,
+                    prueba: prueba.prueba.prueba.prueba,
+                    type: prueba.prueba.type,
+                    idxs: prueba.prueba.idx,
+                    respuestas: null,
+                    preguntas: prueba.prueba.prueba.preguntasAlternativas,
+                    initTiempo: resCliente.temPruebaInit.initTiempo,
+                    tiempoRespuesta:resCliente.temPruebaInit.tiempo
+                }
+
+                let idxCurso = _.findIndex(resCliente.cursosSuscrito,(o)=>{
+                    return o.curso.data.cod_curso==cod_curso;
+                })
+
+                if(idxCurso>-1){
+                    let curso = resCliente.cursosSuscrito[idxCurso];
+
+                    if(curso.pruebasContestadas.length>0){
+                        let idxPruebaContestada = _.findIndex(curso.pruebasContestadas,(o)=>{
+                            return o.prueba.codPrueba==codPrueba;
+                        })
+
+                        if(idxPruebaContestada==-1){
+                            curso.pruebasContestadas.push(registroPrueba);
+                            resCliente.cursosSuscrito.splice(idxCurso,1,curso);
+                            methods.updateEsquemaUsuario({curso:curso,cursosSuscrito:resCliente.cursosSuscrito});
+                        }else{
+                            //prueba ya  registrada
+                            methods.respuesta({respuesta:{curso:curso,state:true,mensaje:'prueba ya registrada'}});
+                        }
+
+                    }else{
+                        curso.pruebasContestadas.push(registroPrueba);
+                        resCliente.cursosSuscrito.splice(idxCurso,1,curso);
+                        methods.updateEsquemaUsuario({curso:curso,cursosSuscrito:resCliente.cursosSuscrito});
+                    }
+                    
+                }else{
+                    //respues curso no encontrado
+                    methods.respuesta({respuesta:{curso:resCliente.cursosSuscrito,state:false,mensaje:'curso no encontrado'}});
+                }
+
+               
+
+
+
+
+
+
+            } else {
+                methods.respuesta({respuesta:{curso:null,state:false,mensaje:'usuario no encontrado'}});
+            }
+        })
         /*        
         let respuestas = data.p.respuestas;
         let cliente = data.p.prueba.cliente;
@@ -1041,11 +1126,11 @@ function fechaHoy() {
         let server = ['cl.pool.ntp.org', 'south-america.pool.ntp.org', 'ntp.shoa.cl'];
 
         ntpClient.getNetworkTime(server[1], 123, (err, data) => {
-            console.log({getNetworkTime:{data:data}});
+            console.log({ getNetworkTime: { data: data } });
             jData = {
                 fechaHoy: moment(data).utc().format('MM-DD-YYYY'),
-                horahoy: moment(data).utc().add('hours',-3).format('HH:mm:ss').split(':'),
-                horahoyses: moment(data).utc().add('hours',-3).format('HH:mm:ss')
+                horahoy: moment(data).utc().add('hours', -3).format('HH:mm:ss').split(':'),
+                horahoyses: moment(data).utc().add('hours', -3).format('HH:mm:ss')
 
             }
             resolve(jData);
@@ -1224,22 +1309,22 @@ function informarInicioPrueba(req, res) {
 
 
                     if (time != null) {
-/**
- * 
- * fechaHoy: moment(data).utc().format('MM-DD-YYYY'),
-                horahoy: moment(data).utc().add('hours',-3).format('HH:mm:ss').split(':'),
-                horahoyses: moment(data).utc().add('hours',-3).format('HH:mm:ss')
- * 
- */
-                        if(time.fechaHoy!='Invalid date'
-                          && time.fechaHoy!=undefined
-                          && time.fechaHoy!=null 
-                          && time.horahoy!='Invalid date'
-                          && time.horahoy!=undefined 
-                          && time.horahoy!=null
-                          && time.horahoyses!='Invalid date' 
-                          && time.horahoyses!=undefined 
-                          && time.horahoyses!=null){
+                        /**
+                         * 
+                         * fechaHoy: moment(data).utc().format('MM-DD-YYYY'),
+                                        horahoy: moment(data).utc().add('hours',-3).format('HH:mm:ss').split(':'),
+                                        horahoyses: moment(data).utc().add('hours',-3).format('HH:mm:ss')
+                         * 
+                         */
+                        if (time.fechaHoy != 'Invalid date'
+                            && time.fechaHoy != undefined
+                            && time.fechaHoy != null
+                            && time.horahoy != 'Invalid date'
+                            && time.horahoy != undefined
+                            && time.horahoy != null
+                            && time.horahoyses != 'Invalid date'
+                            && time.horahoyses != undefined
+                            && time.horahoyses != null) {
                             if (resCliente.temPruebaInit == null) {
                                 prueba.initTiempo = time;
                                 prueba.tiempo = time;
@@ -1258,7 +1343,7 @@ function informarInicioPrueba(req, res) {
                                 let pruebaInit = resCliente.temPruebaInit.prueba.prueba.prueba;
                                 if (pruebaInit.codPrueba == prueba.prueba.prueba.prueba.codPrueba) {
                                     prueba.tiempo = time;
-                                    prueba.initTiempo=resCliente.temPruebaInit.initTiempo;
+                                    prueba.initTiempo = resCliente.temPruebaInit.initTiempo;
                                     method.respuesta({ informar: { state: true, mensaje: 'informada', prueba: prueba } });
                                 } else {
                                     prueba.initTiempo = time;
@@ -1274,15 +1359,15 @@ function informarInicioPrueba(req, res) {
                                             method.respuesta({ informar: { state: false, mensaje: 'error al informar', prueba: prueba } });
                                         }
                                     })
-    
-                                }
-    
-                            }
-                          }else{
-                            method.respuesta({ informar: { state: false, mensaje: 'error al informar tiempo invalid o undefined o null', prueba: prueba } });
-                          }
 
-                        
+                                }
+
+                            }
+                        } else {
+                            method.respuesta({ informar: { state: false, mensaje: 'error al informar tiempo invalid o undefined o null', prueba: prueba } });
+                        }
+
+
                     } else {
                         method.respuesta({ informar: { state: false, mensaje: 'error al informar', prueba: prueba } });
                     }
