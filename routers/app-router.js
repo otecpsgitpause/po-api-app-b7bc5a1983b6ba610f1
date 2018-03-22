@@ -34,4 +34,6 @@ secureRouter.post('/455DFGDFJkdsjfskDJFKGD8FDKJkjfdgjKDFGJ894DJF',app.cliente.re
 secureRouter.post('/70XNJgdaXDoIWD2YqAKTsiyh01KUbIwqCv5AZL5puL5Q',app.cliente.updateEsquema);
 //9001b14
 secureRouter.post('/ip82IvDKN6ec5h6ktIcUMP8YFdEiw31ZeKurwD3XuXTr',app.cliente.getCurso);
+//9001b15
+secureRouter.post('/L28cSjsraHntrEblz0KpRlT8bTJ5ERiWXEGRbEpfbBlD',app.cliente.responderPregunta);
 module.exports =secureRouter; 

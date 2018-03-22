@@ -22,7 +22,8 @@ var cliente = {
         resultadoPrueba: resultadoPrueba,
         resultadoTerminoCurso: resultadoTerminoCurso,
         updateEsquema: updateEsquema,
-        getCurso: getCurso
+        getCurso: getCurso,
+        responderPregunta:responderPregunta
     }
 };
 

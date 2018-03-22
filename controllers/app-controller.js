@@ -23,7 +23,8 @@ var app={
             resultadoPrueba:clientes.resultadoPrueba,
             resultadoTerminoCurso:clientes.resultadoTerminoCurso,
             updateEsquema:clientes.updateEsquema,
-            getCurso:clientes.getCurso
+            getCurso:clientes.getCurso,
+            responderPregunta:clientes.responderPregunta
         },
         complement:{
             hora:hora
