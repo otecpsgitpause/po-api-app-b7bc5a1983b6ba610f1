@@ -1377,9 +1377,11 @@ function informarInicioPrueba(req, res) {
                                     }
                                 }, (err, raw) => {
                                     if (err == null) {
-                                        method.respuesta({ informar: { state: true, mensaje: 'new informada', prueba: prueba } });
+                                        method.respuesta({ informar: { state: true, mensaje: 'new informada', prueba: prueba,
+                                        cliresres:{resultadoPrueba:null,respuestas:null} } });
                                     } else {
-                                        method.respuesta({ informar: { state: false, mensaje: 'error al informar', prueba: prueba } });
+                                        method.respuesta({ informar: { state: false, mensaje: 'error al informar', prueba: prueba,
+                                        cliresres:{resultadoPrueba:null,respuestas:null} } });
                                     }
                                 })
                             } else {
@@ -1387,21 +1389,24 @@ function informarInicioPrueba(req, res) {
                                 if (pruebaInit.codPrueba == prueba.prueba.prueba.prueba.codPrueba) {
                                     prueba.tiempo = time;
                                     prueba.initTiempo = resCliente.temPruebaInit.initTiempo;
-                                    method.respuesta({ informar: { state: true, mensaje: 'informada', prueba: prueba } });
+                                    method.respuesta({ informar: { state: true, mensaje: 'informada', prueba: prueba,
+                                    cliresres:{resultadoPrueba:resCliente.resultadoPrueba,respuestas:resCliente.respuestas} } });
                                 } else {
                                     prueba.initTiempo = time;
                                     prueba.tiempo = time;
                                     mgdClientesOtec.update({ "cliente.rut": cliente.rut }, {
                                         $set: {
                                             "temPruebaInit": prueba,
-                                            "resultadoPrueba":null,
-                                            "respuestas":null
+                                            "resultadoPrueba":resCliente.resultadoPrueba,
+                                            "respuestas":resCliente.respuestas
                                         }
                                     }, (err, raw) => {
                                         if (err == null) {
-                                            method.respuesta({ informar: { state: true, mensaje: 'actualizado', prueba: prueba } });
+                                            method.respuesta({ informar: { state: true, mensaje: 'actualizado', prueba: prueba,
+                                             cliresres:{resultadoPrueba:resCliente.resultadoPrueba,respuestas:resCliente.respuestas} } });
                                         } else {
-                                            method.respuesta({ informar: { state: false, mensaje: 'error al informar', prueba: prueba } });
+                                            method.respuesta({ informar: { state: false, mensaje: 'error al informar', prueba: prueba,
+                                            cliresres:{resultadoPrueba:resCliente.resultadoPrueba,respuestas:resCliente.respuestas} } });
                                         }
                                     })
 
