@@ -13,7 +13,7 @@ var cursos={
 function subscribed(req,res){
     try{
         let data = req.body.data;
-        mgdClientesOtec.find({"identificador.key":data.i,"cliente.rut":data.cliente.rut},(err,resSuscribCurso)=>{
+        mgdClientesOtec.find({"cliente.rut":data.cliente.rut},(err,resSuscribCurso)=>{
             if(err==null && resSuscribCurso.length!=0){
                 
                 console.log({cursosSuscrito:resSuscribCurso[0].cursosSuscrito});

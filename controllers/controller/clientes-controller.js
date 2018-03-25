@@ -959,7 +959,7 @@ function login(req, res) {
         let data = req.body.data;
         let identificador = req.body.ident;
         console.log({ data: data, identificador: identificador });
-        mgdClientesOtec.find({ "identificador.key": identificador, "cliente.email": data.user }, (err, resCliente) => {
+        mgdClientesOtec.find({ "cliente.email": data.user }, (err, resCliente) => {
             if (err == null && resCliente.length != 0) {
                 console.log({ clienteAuth: resCliente[0] });
                 //resCliente[0].cursosSuscrito
@@ -1038,7 +1038,7 @@ function informartiempo(req, res) {
         let cnt = req.body.data.tiempo.cnt;
 
         console.log({ user: user, time: time, clase: clase, curso: curso, identificadorApp: identificadorApp, identificador: identificador, cnt: cnt });
-        mgdClientesOtec.findOne({ "cliente.rut": user.cliente.rut, "identificador.key": identificador }, (err, resEstudiante) => {
+        mgdClientesOtec.findOne({ "cliente.rut": user.cliente.rut }, (err, resEstudiante) => {
             if (err == null && resEstudiante != null) {
                 let cursosSuscritos = resEstudiante.cursosSuscrito;
                 let idxCurso = _.findIndex(cursosSuscritos, (o) => {
@@ -1049,13 +1049,13 @@ function informartiempo(req, res) {
                     cursoUpdate.esquema.modulos[cnt.im].clases[cnt.ic].clase.horasClaseSegundos = time;
                     resEstudiante.cursosSuscrito[idxCurso] = method.____updateEsquema(cursoUpdate);
 
-                    mgdClientesOtec.update({ "cliente.rut": user.cliente.rut, "identificador.key": identificador }, {
+                    mgdClientesOtec.update({ "cliente.rut": user.cliente.rut }, {
                         $set: {
                             "cursosSuscrito": resEstudiante.cursosSuscrito
                         }
                     }, (err, raw) => {
                         if (err == null) {
-                            mgdClientesOtec.findOne({ "cliente.rut": user.cliente.rut, "identificador.key": identificador }, (err, resEstudianteUpdate) => {
+                            mgdClientesOtec.findOne({ "cliente.rut": user.cliente.rut }, (err, resEstudianteUpdate) => {
                                 if (err == null && resEstudianteUpdate != null) {
                                     method.respuesta({ curso: resEstudianteUpdate.cursosSuscrito[idxCurso], error: false, mensaje: 'Tiempo actualizado con exito' });
                                 } else {
@@ -1207,7 +1207,7 @@ function getPruebaTest(req, res) {
         let identificador = data.u.i;
         let cliente = data.u.cliente;
         console.log({ cliente: cliente });
-        mgdClientesOtec.findOne({ "cliente.email": cliente.email, "identificador.key": identificador }, (err, resCliente) => {
+        mgdClientesOtec.findOne({ "cliente.email": cliente.email }, (err, resCliente) => {
             if (resCliente != null) {
                 let cod_curso = prueba.cod_curso;
                 let idxCurso = _.findIndex(resCliente.cursosSuscrito, (o) => {
@@ -1294,7 +1294,7 @@ function getPruebaTest(req, res) {
                 }
 
 
-                mgdClientesOtec.update({ "cliente.email": item.email, "identificador.key": item.identificador }, {
+                mgdClientesOtec.update({ "cliente.email": item.email }, {
                     $set: {
                         "temPruebaInit": prueba
                     }
